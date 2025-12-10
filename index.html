@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChartSpec - Data Visualization Assistant</title>
+  <link rel="stylesheet" href="./styles.css">
+  <!-- Plotly.js from CDN -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>ChartSpec</h1>
+      <p class="subtitle">AI-Powered Data Visualization</p>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Sidebar: Dataset & LLM Settings -->
+      <aside class="sidebar">
+        <!-- Dataset Management -->
+        <section class="panel">
+          <h2>Dataset</h2>
+          
+          <div class="form-group">
+            <label for="dataset-select">Select Dataset:</label>
+            <select id="dataset-select" class="form-control">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="button-group">
+            <button id="add-dataset-btn" class="btn btn-secondary">Add Dataset</button>
+            <button id="reload-dataset-btn" class="btn btn-secondary">Reload</button>
+            <button id="delete-dataset-btn" class="btn btn-danger">Delete</button>
+          </div>
+
+          <!-- Add Dataset Form (hidden by default) -->
+          <div id="add-dataset-form" class="add-dataset-form" style="display: none;">
+            <h3>Add New Dataset</h3>
+            <p class="note">
+              <strong>Note:</strong> Browser localStorage has ~5-10MB limit. 
+              Large CSV files (&gt;1MB) may cause issues. 
+              Consider using smaller datasets or server-side processing for production.
+            </p>
+            <div class="form-group">
+              <label for="dataset-name">Name:</label>
+              <input type="text" id="dataset-name" class="form-control" placeholder="My Dataset">
+            </div>
+            <div class="form-group">
+              <label for="dataset-url">CSV URL:</label>
+              <input type="text" id="dataset-url" class="form-control" placeholder="./datasets/data.csv or https://...">
+            </div>
+            <div class="button-group">
+              <button id="register-dataset-btn" class="btn btn-primary">Register</button>
+              <button id="cancel-dataset-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
+
+          <div id="dataset-info" class="dataset-info">
+            <p class="placeholder">No dataset selected</p>
+          </div>
+        </section>
+
+        <!-- LLM Settings -->
+        <section class="panel">
+          <h2>LLM Settings</h2>
+          
+          <div class="form-group">
+            <label for="llm-provider">Provider:</label>
+            <select id="llm-provider" class="form-control">
+              <option value="openai">OpenAI</option>
+              <option value="grok">Grok (X.AI)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="api-key">API Key:</label>
+            <input type="password" id="api-key" class="form-control" placeholder="Enter your API key">
+            <p class="note">
+              <strong>Security:</strong> Never commit API keys to repositories. 
+              Keys are stored in browser localStorage only.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="auto-refine">
+              Auto-refine charts (experimental)
+            </label>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Main Area: Chat & Visualization -->
+      <main class="main-area">
+        <!-- Chat Section -->
+        <section class="panel chat-section">
+          <h2>Chat</h2>
+          
+          <div id="chat-log" class="chat-log">
+            <!-- Chat messages appear here -->
+          </div>
+
+          <div class="chat-input-area">
+            <textarea 
+              id="user-message" 
+              class="form-control" 
+              placeholder="Ask for a chart... (e.g., 'Show revenue by region as a bar chart')"
+              rows="3"></textarea>
+            <div class="button-group">
+              <button id="send-message-btn" class="btn btn-primary">Send</button>
+              <button id="clear-chat-btn" class="btn btn-secondary">Clear Chat</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Visualization Section -->
+        <section class="panel visualization-section">
+          <h2>Visualization</h2>
+          <div id="visualization" class="visualization-container">
+            <p class="placeholder">No visualization yet</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>ChartSpec - Browser-based data visualization with AI assistance</p>
+    </footer>
+  </div>
+
+  <!-- Load main application as ES module -->
+  <script type="module" src="./chartspec/main.js"></script>
+</body>
+</html>
