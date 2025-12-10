@@ -4,6 +4,7 @@ import { autoRegisterDemoDatasets, getDatasets, registerDataset, getDatasetRows,
 import { applySpecToRows } from './dataEngine.js';
 import { renderChart } from './chartRenderer.js';
 import { getUpdatedChartSpec, refineChartSpec } from './llmRouter.js';
+import { sampleLocalSpec, validChartTypes } from './chartSpec.js';
 
 // Application state
 let state = {
@@ -13,7 +14,9 @@ let state = {
   currentSpec: null,
   chatHistory: [],
   provider: 'openai',
-  apiKey: ''
+  apiKey: '',
+  localMode: false,
+  manualChartSpec: null
 };
 
 /**
@@ -43,6 +46,8 @@ export async function init() {
 function loadSettings() {
   const savedProvider = localStorage.getItem('chartspec_provider');
   const savedApiKey = localStorage.getItem('chartspec_apikey');
+  const savedLocalMode = localStorage.getItem('chartspec_localmode');
+  const savedManualSpec = localStorage.getItem('chartspec_manualspec');
   
   if (savedProvider) {
     state.provider = savedProvider;
@@ -53,6 +58,30 @@ function loadSettings() {
     state.apiKey = savedApiKey;
     document.getElementById('api-key').value = savedApiKey;
   }
+  
+  // Load local mode state
+  if (savedLocalMode === 'true') {
+    state.localMode = true;
+    document.getElementById('local-mode').checked = true;
+    updateLocalModeUI();
+  }
+  
+  // Load manual ChartSpec or use sample
+  if (savedManualSpec) {
+    try {
+      state.manualChartSpec = JSON.parse(savedManualSpec);
+      document.getElementById('chartspec-input').value = savedManualSpec;
+    } catch (e) {
+      // If invalid, use sample and log error
+      console.warn('Failed to parse saved ChartSpec, using sample instead:', e.message);
+      state.manualChartSpec = sampleLocalSpec;
+      document.getElementById('chartspec-input').value = JSON.stringify(sampleLocalSpec, null, 2);
+    }
+  } else {
+    // Use sample by default
+    state.manualChartSpec = sampleLocalSpec;
+    document.getElementById('chartspec-input').value = JSON.stringify(sampleLocalSpec, null, 2);
+  }
 }
 
 /**
@@ -61,6 +90,11 @@ function loadSettings() {
 function saveSettings() {
   localStorage.setItem('chartspec_provider', state.provider);
   localStorage.setItem('chartspec_apikey', state.apiKey);
+  localStorage.setItem('chartspec_localmode', state.localMode.toString());
+  if (state.manualChartSpec) {
+    // Store the formatted JSON for readability
+    localStorage.setItem('chartspec_manualspec', JSON.stringify(state.manualChartSpec, null, 2));
+  }
 }
 
 /**
@@ -84,6 +118,16 @@ function setupEventListeners() {
   document.getElementById('api-key').addEventListener('input', (e) => {
     state.apiKey = e.target.value;
     saveSettings();
+  });
+  
+  // Local mode toggle
+  document.getElementById('local-mode').addEventListener('change', handleLocalModeToggle);
+  
+  // Local mode ChartSpec
+  document.getElementById('apply-chartspec-btn').addEventListener('click', handleApplyChartSpec);
+  document.getElementById('chartspec-input').addEventListener('input', (e) => {
+    // Clear error on input
+    document.getElementById('chartspec-error').style.display = 'none';
   });
   
   // Chat
@@ -252,6 +296,115 @@ function handleDeleteDataset() {
 }
 
 /**
+ * Handle local mode toggle
+ */
+function handleLocalModeToggle(e) {
+  state.localMode = e.target.checked;
+  saveSettings();
+  updateLocalModeUI();
+}
+
+/**
+ * Update UI based on local mode state
+ */
+function updateLocalModeUI() {
+  const llmConfig = document.getElementById('llm-config');
+  const localModeConfig = document.getElementById('local-mode-config');
+  
+  if (state.localMode) {
+    llmConfig.style.display = 'none';
+    localModeConfig.style.display = 'block';
+  } else {
+    llmConfig.style.display = 'block';
+    localModeConfig.style.display = 'none';
+  }
+}
+
+/**
+ * Validate ChartSpec JSON
+ * @param {Object} spec - Parsed ChartSpec object
+ * @returns {Object} { valid: boolean, error: string }
+ */
+function validateChartSpec(spec) {
+  if (!spec || typeof spec !== 'object') {
+    return { valid: false, error: 'ChartSpec must be a JSON object' };
+  }
+  
+  if (!spec.chartType) {
+    return { valid: false, error: 'ChartSpec must include a "chartType" property' };
+  }
+  
+  if (!validChartTypes.includes(spec.chartType)) {
+    return { valid: false, error: `Invalid chartType: ${spec.chartType}. Must be one of: ${validChartTypes.join(', ')}` };
+  }
+  
+  return { valid: true, error: null };
+}
+
+/**
+ * Handle apply ChartSpec in local mode
+ */
+function handleApplyChartSpec() {
+  const chartSpecInput = document.getElementById('chartspec-input').value.trim();
+  const errorDiv = document.getElementById('chartspec-error');
+  
+  // Validation
+  if (!state.selectedDataset) {
+    alert('Please select a dataset first');
+    return;
+  }
+  
+  if (state.currentRows.length === 0) {
+    alert('No data available in selected dataset');
+    return;
+  }
+  
+  if (!chartSpecInput) {
+    errorDiv.textContent = 'ChartSpec JSON cannot be empty';
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  // Parse JSON
+  let spec;
+  try {
+    spec = JSON.parse(chartSpecInput);
+  } catch (e) {
+    errorDiv.textContent = `JSON Parse Error: ${e.message}`;
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  // Validate ChartSpec
+  const validation = validateChartSpec(spec);
+  if (!validation.valid) {
+    errorDiv.textContent = validation.error;
+    errorDiv.style.display = 'block';
+    return;
+  }
+  
+  // Clear error
+  errorDiv.style.display = 'none';
+  
+  // Store spec
+  state.currentSpec = spec;
+  state.manualChartSpec = spec;
+  saveSettings();
+  
+  // Apply spec to data
+  const transformedRows = applySpecToRows(state.currentRows, spec);
+  
+  console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
+  
+  // Render chart
+  const vizContainer = document.getElementById('visualization');
+  renderChart(vizContainer, transformedRows, spec);
+  
+  // Add message to chat
+  addChatMessage('assistant', `Applied ChartSpec in local mode:\n${JSON.stringify(spec, null, 2)}`);
+}
+
+/**
  * Handle send message
  */
 async function handleSendMessage() {
@@ -265,13 +418,19 @@ async function handleSendMessage() {
     return;
   }
   
-  if (!state.apiKey) {
-    alert('Please provide an API key');
+  if (state.currentRows.length === 0) {
+    alert('No data available in selected dataset');
     return;
   }
   
-  if (state.currentRows.length === 0) {
-    alert('No data available in selected dataset');
+  // In local mode, direct users to use the Apply ChartSpec button
+  if (state.localMode) {
+    alert('In Local Mode, please edit the ChartSpec JSON and click "Apply ChartSpec" button instead of sending messages.');
+    return;
+  }
+  
+  if (!state.apiKey) {
+    alert('Please provide an API key');
     return;
   }
   

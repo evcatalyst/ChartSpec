@@ -69,27 +69,53 @@
           <h2>LLM Settings</h2>
           
           <div class="form-group">
-            <label for="llm-provider">Provider:</label>
-            <select id="llm-provider" class="form-control">
-              <option value="openai">OpenAI</option>
-              <option value="grok">Grok (X.AI)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="api-key">API Key:</label>
-            <input type="password" id="api-key" class="form-control" placeholder="Enter your API key">
+            <label>
+              <input type="checkbox" id="local-mode">
+              <strong>Local Mode (No LLM)</strong>
+            </label>
             <p class="note">
-              <strong>Security:</strong> Never commit API keys to repositories. 
-              Keys are stored in browser localStorage only.
+              Skip LLM and use manual ChartSpec JSON. API key not required.
             </p>
           </div>
 
-          <div class="form-group">
-            <label>
-              <input type="checkbox" id="auto-refine">
-              Auto-refine charts (experimental)
-            </label>
+          <div id="llm-config">
+            <div class="form-group">
+              <label for="llm-provider">Provider:</label>
+              <select id="llm-provider" class="form-control">
+                <option value="openai">OpenAI</option>
+                <option value="grok">Grok (X.AI)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="api-key">API Key:</label>
+              <input type="password" id="api-key" class="form-control" placeholder="Enter your API key">
+              <p class="note">
+                <strong>Security:</strong> Never commit API keys to repositories. 
+                Keys are stored in browser localStorage only.
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="auto-refine">
+                Auto-refine charts (experimental)
+              </label>
+            </div>
+          </div>
+
+          <div id="local-mode-config" style="display: none;">
+            <div class="form-group">
+              <label for="chartspec-input">ChartSpec JSON:</label>
+              <textarea id="chartspec-input" class="form-control chartspec-textarea" rows="15" placeholder="Enter ChartSpec JSON..."></textarea>
+              <p id="chartspec-error" class="error-message" style="display: none;"></p>
+              <p class="note">
+                Edit the ChartSpec JSON directly. Click "Apply ChartSpec" to render.
+              </p>
+            </div>
+            <div class="button-group">
+              <button id="apply-chartspec-btn" class="btn btn-primary">Apply ChartSpec</button>
+            </div>
           </div>
         </section>
       </aside>
