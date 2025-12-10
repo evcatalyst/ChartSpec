@@ -411,6 +411,24 @@ textarea.form-control {
   background: #555;
 }
 
+/* ===== Local Mode Styles ===== */
+.chartspec-textarea {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  min-height: 300px;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
 /* ===== Print Styles ===== */
 @media print {
   .sidebar,
