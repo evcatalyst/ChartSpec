@@ -64,12 +64,20 @@ export function renderSingleChart(container, rows, spec, facetValue = null) {
       if (spec.chartType === 'scatter' || spec.chartType === 'line') {
         const uniqueColors = [...new Set(colorValues)];
         uniqueColors.forEach(colorVal => {
-          const filteredIndices = colorValues.map((v, i) => v === colorVal ? i : -1).filter(i => i >= 0);
+          // Build x and y arrays in single pass for better performance
+          const xFiltered = [];
+          const yFiltered = [];
+          for (let i = 0; i < colorValues.length; i++) {
+            if (colorValues[i] === colorVal) {
+              xFiltered.push(trace.x[i]);
+              yFiltered.push(trace.y[i]);
+            }
+          }
           const colorTrace = {
             ...trace,
             name: `${yCol} - ${colorVal}`,
-            x: filteredIndices.map(i => trace.x[i]),
-            y: filteredIndices.map(i => trace.y[i])
+            x: xFiltered,
+            y: yFiltered
           };
           data.push(colorTrace);
         });

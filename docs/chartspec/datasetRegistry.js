@@ -17,14 +17,21 @@ const DEMO_DATASETS = [
  * @returns {Array} Array of row objects
  */
 function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
+  const lines = csvText.trim().split('\n').filter(line => line.trim().length > 0);
   if (lines.length < 2) return [];
   
   const headers = lines[0].split(',').map(h => h.trim());
   const rows = [];
   
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim());
+    const line = lines[i].trim();
+    if (!line) continue; // Skip empty lines
+    
+    const values = line.split(',').map(v => v.trim());
+    
+    // Skip rows that are all empty
+    if (values.every(v => v === '')) continue;
+    
     const row = {};
     headers.forEach((header, index) => {
       row[header] = values[index] || '';
