@@ -184,9 +184,6 @@ export function renderChart(container, rows, spec) {
     // Create grid container for facets
     const gridContainer = document.createElement('div');
     gridContainer.className = 'facet-grid';
-    gridContainer.style.display = 'grid';
-    gridContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(260px, 1fr))';
-    gridContainer.style.gap = '1rem';
     
     facets.forEach(facet => {
       const facetContainer = document.createElement('div');

@@ -8,6 +8,11 @@ const DEMO_DATASETS = [
 
 /**
  * Parse CSV text into array of objects
+ * NOTE: This is a simple CSV parser for demo purposes. It does not handle:
+ * - Quoted fields containing commas
+ * - Escaped quotes
+ * - Multi-line fields
+ * For production use, consider using a proper CSV parsing library like Papa Parse.
  * @param {string} csvText - CSV content
  * @returns {Array} Array of row objects
  */

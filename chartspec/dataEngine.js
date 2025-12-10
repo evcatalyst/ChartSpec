@@ -20,7 +20,7 @@ export function applyFilters(rows, filters) {
           
         case 'equality':
           // Exact match
-          return value == filter.value;
+          return value === filter.value;
           
         case 'op':
           // Numeric comparison operators
@@ -31,7 +31,7 @@ export function applyFilters(rows, filters) {
             case '<': return numValue < numTarget;
             case '>=': return numValue >= numTarget;
             case '<=': return numValue <= numTarget;
-            case '!=': return numValue != numTarget;
+            case '!=': return numValue !== numTarget;
             default: return true;
           }
           
