@@ -69,3 +69,5 @@ export const sampleLocalSpec = {
   sort: { column: "Revenue", order: "desc" },
   config: { responsive: true }
 };
+
+export const validChartTypes = ['bar', 'line', 'scatter', 'pie', 'histogram', 'box', 'heatmap', 'table', 'tableOnly', 'pivot'];

@@ -4,7 +4,7 @@ import { autoRegisterDemoDatasets, getDatasets, registerDataset, getDatasetRows,
 import { applySpecToRows } from './dataEngine.js';
 import { renderChart } from './chartRenderer.js';
 import { getUpdatedChartSpec, refineChartSpec } from './llmRouter.js';
-import { sampleLocalSpec } from './chartSpec.js';
+import { sampleLocalSpec, validChartTypes } from './chartSpec.js';
 
 // Application state
 let state = {
@@ -72,7 +72,8 @@ function loadSettings() {
       state.manualChartSpec = JSON.parse(savedManualSpec);
       document.getElementById('chartspec-input').value = savedManualSpec;
     } catch (e) {
-      // If invalid, use sample
+      // If invalid, use sample and log error
+      console.warn('Failed to parse saved ChartSpec, using sample instead:', e.message);
       state.manualChartSpec = sampleLocalSpec;
       document.getElementById('chartspec-input').value = JSON.stringify(sampleLocalSpec, null, 2);
     }
@@ -91,6 +92,7 @@ function saveSettings() {
   localStorage.setItem('chartspec_apikey', state.apiKey);
   localStorage.setItem('chartspec_localmode', state.localMode.toString());
   if (state.manualChartSpec) {
+    // Store the formatted JSON for readability
     localStorage.setItem('chartspec_manualspec', JSON.stringify(state.manualChartSpec, null, 2));
   }
 }
@@ -332,7 +334,6 @@ function validateChartSpec(spec) {
     return { valid: false, error: 'ChartSpec must include a "chartType" property' };
   }
   
-  const validChartTypes = ['bar', 'line', 'scatter', 'pie', 'histogram', 'box', 'heatmap', 'table', 'tableOnly', 'pivot'];
   if (!validChartTypes.includes(spec.chartType)) {
     return { valid: false, error: `Invalid chartType: ${spec.chartType}. Must be one of: ${validChartTypes.join(', ')}` };
   }
