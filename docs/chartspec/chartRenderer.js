@@ -45,7 +45,6 @@ export function renderSingleChart(container, rows, spec, facetValue = null) {
     // Show warning message and render as table
     const warningDiv = document.createElement('div');
     warningDiv.className = 'plotly-fallback-warning';
-    warningDiv.style.cssText = 'background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 12px; margin-bottom: 12px; border-radius: 4px; font-size: 14px;';
     warningDiv.innerHTML = '<strong>⚠️ Plotly Not Available:</strong> Displaying data as a table instead. To see charts, ensure you have internet connectivity and reload the page.';
     container.appendChild(warningDiv);
     
