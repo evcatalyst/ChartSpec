@@ -1,0 +1,21 @@
+# Temporary files
+/tmp/
+*.tmp
+*.log
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# API keys (should never be committed)
+*.env
+.env
+.env.local
+api-keys.txt
