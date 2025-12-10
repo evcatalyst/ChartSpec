@@ -1,0 +1,21 @@
+Date,Region,Product,Quantity,Revenue
+2024-01-15,North,Widget A,120,2400
+2024-01-15,South,Widget B,85,1700
+2024-01-15,East,Widget A,95,1900
+2024-01-15,West,Widget C,150,4500
+2024-02-10,North,Widget B,110,2200
+2024-02-10,South,Widget A,130,2600
+2024-02-10,East,Widget C,160,4800
+2024-02-10,West,Widget A,105,2100
+2024-03-05,North,Widget C,145,4350
+2024-03-05,South,Widget B,90,1800
+2024-03-05,East,Widget A,125,2500
+2024-03-05,West,Widget B,100,2000
+2024-04-12,North,Widget A,135,2700
+2024-04-12,South,Widget C,155,4650
+2024-04-12,East,Widget B,95,1900
+2024-04-12,West,Widget A,140,2800
+2024-05-20,North,Widget B,115,2300
+2024-05-20,South,Widget A,120,2400
+2024-05-20,East,Widget C,170,5100
+2024-05-20,West,Widget B,105,2100
