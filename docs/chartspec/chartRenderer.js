@@ -38,6 +38,23 @@ export function renderSingleChart(container, rows, spec, facetValue = null) {
     return;
   }
   
+  // Check if Plotly is available - if not, fallback to table view
+  if (typeof Plotly === 'undefined') {
+    console.warn('Plotly is not available. Falling back to table view.');
+    
+    // Show warning message and render as table
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'plotly-fallback-warning';
+    warningDiv.innerHTML = '<strong>⚠️ Plotly Not Available:</strong> Displaying data as a table instead. To see charts, ensure you have internet connectivity and reload the page.';
+    container.appendChild(warningDiv);
+    
+    // Render as table
+    const tableContainer = document.createElement('div');
+    container.appendChild(tableContainer);
+    renderTable(tableContainer, rows, { ...spec, chartType: 'table' }, facetValue);
+    return;
+  }
+  
   // Prepare Plotly data
   const data = [];
   

@@ -411,6 +411,17 @@ textarea.form-control {
   background: #555;
 }
 
+/* ===== Local Mode Styles ===== */
+.plotly-fallback-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
 /* ===== Print Styles ===== */
 @media print {
   .sidebar,
