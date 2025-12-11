@@ -5,6 +5,9 @@ import { applySpecToRows } from './dataEngine.js';
 import { renderChart } from './chartRenderer.js';
 import { getUpdatedChartSpec, refineChartSpec } from './llmRouter.js';
 import { sampleLocalSpec, validChartTypes } from './chartSpec.js';
+import { rendererFactory } from './rendererFactory.js';
+import { PlotlyRenderer } from './renderers/PlotlyRenderer.js';
+import { D3Renderer } from './renderers/D3Renderer.js';
 
 // Application state
 let state = {
@@ -16,7 +19,8 @@ let state = {
   provider: 'openai',
   apiKey: '',
   localMode: false,
-  manualChartSpec: null
+  manualChartSpec: null,
+  currentRenderer: 'plotly' // Default renderer
 };
 
 /**
@@ -24,6 +28,9 @@ let state = {
  */
 export async function init() {
   console.log('Initializing ChartSpec application...');
+  
+  // Initialize renderers
+  initializeRenderers();
   
   // Auto-register demo datasets
   await autoRegisterDemoDatasets();
@@ -38,6 +45,21 @@ export async function init() {
   setupEventListeners();
   
   console.log('ChartSpec application initialized');
+}
+
+/**
+ * Initialize and register renderers
+ */
+function initializeRenderers() {
+  // Register Plotly renderer (default)
+  rendererFactory.register(new PlotlyRenderer(), true);
+  
+  // Register D3 renderer (alternative)
+  rendererFactory.register(new D3Renderer(), false);
+  
+  // Log available renderers
+  const renderers = rendererFactory.listRenderers();
+  console.log('Available renderers:', renderers);
 }
 
 /**
@@ -396,9 +418,10 @@ function handleApplyChartSpec() {
   
   console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
   
-  // Render chart
+  // Render chart using renderer factory
   const vizContainer = document.getElementById('visualization');
-  renderChart(vizContainer, transformedRows, spec);
+  const renderer = rendererFactory.getBestRenderer(spec.chartType);
+  renderer.renderChart(vizContainer, transformedRows, spec);
   
   // Add message to chat
   addChatMessage('assistant', `Applied ChartSpec in local mode:\n${JSON.stringify(spec, null, 2)}`);
@@ -472,9 +495,10 @@ async function handleSendMessage() {
     
     console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
     
-    // Render chart
+    // Render chart using renderer factory
     const vizContainer = document.getElementById('visualization');
-    renderChart(vizContainer, transformedRows, spec);
+    const renderer = rendererFactory.getBestRenderer(spec.chartType);
+    renderer.renderChart(vizContainer, transformedRows, spec);
     
     // Optional auto-refine
     const autoRefine = document.getElementById('auto-refine')?.checked;
@@ -515,7 +539,8 @@ async function handleAutoRefine(spec, columns, sampleRows) {
     // Apply refined spec
     state.currentSpec = refinedSpec;
     const transformedRows = applySpecToRows(state.currentRows, refinedSpec);
-    renderChart(vizContainer, transformedRows, refinedSpec);
+    const renderer = rendererFactory.getBestRenderer(refinedSpec.chartType);
+    renderer.renderChart(vizContainer, transformedRows, refinedSpec);
     
     addChatMessage('assistant', `Auto-refined chart with improved settings.`);
     
