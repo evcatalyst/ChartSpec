@@ -29,11 +29,18 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 
 1. Select your LLM provider (OpenAI or Grok)
 2. Enter your API key in the settings panel
-3. **Important**: API keys are stored in browser localStorage only - never commit them to repositories
+3. Optionally select a specific model (or use the provider default)
+4. **Important**: API keys are stored in browser localStorage only - never commit them to repositories
 
 **Getting API Keys:**
 - **OpenAI**: https://platform.openai.com/api-keys
 - **Grok**: https://console.x.ai/
+
+**Default Models:**
+- **OpenAI**: `gpt-4o-mini` (cost-effective, recommended)
+- **Grok**: `grok-3` (replaces deprecated `grok-beta`)
+
+**Note**: The `grok-beta` model has been deprecated by X.AI. If you encounter errors about model availability, use `grok-3` or other current models instead.
 
 ### 3. Load a Dataset
 
