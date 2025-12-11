@@ -109,11 +109,14 @@ function handleModelSelect(e) {
     // Clear custom model to use provider default
     state.customModel = '';
     modelInput.value = '';
-    saveSettings();
   } else {
     // Set to selected model
     state.customModel = selectedModel;
     modelInput.value = selectedModel;
+  }
+  
+  // Save settings once after all updates
+  if (selectedModel !== 'custom') {
     saveSettings();
   }
 }

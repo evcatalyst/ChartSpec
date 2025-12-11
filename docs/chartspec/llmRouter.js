@@ -139,7 +139,7 @@ async function callLLM(provider, apiKey, messages, customModel = null) {
     
     // Add helpful hint for 404/deprecation errors
     if (response.status === 404 || errorText.includes('deprecated') || errorText.includes('not found')) {
-      if (provider === 'grok' && model.includes('beta')) {
+      if (provider === 'grok' && (model === 'grok-beta' || model.endsWith('-beta'))) {
         errorMessage += '\n\nHint: The model "grok-beta" has been deprecated. Try using "grok-3" instead.';
       }
     }
