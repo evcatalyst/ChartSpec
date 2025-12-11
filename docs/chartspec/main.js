@@ -60,8 +60,17 @@ function loadSettings() {
     state.customModel = savedModel;
     document.getElementById('model-input').value = savedModel;
     
-    // Sync the dropdown to match the saved model
+    // Ensure 'custom' option exists in the dropdown
     const modelSelect = document.getElementById('model-select');
+    let customOption = Array.from(modelSelect.options).find(opt => opt.value === 'custom');
+    if (!customOption) {
+      // Add 'custom' option if missing
+      const option = document.createElement('option');
+      option.value = 'custom';
+      option.text = 'Custom';
+      modelSelect.appendChild(option);
+    }
+    // Sync the dropdown to match the saved model
     const matchingOption = Array.from(modelSelect.options).find(opt => opt.value === savedModel);
     if (matchingOption) {
       modelSelect.value = savedModel;
