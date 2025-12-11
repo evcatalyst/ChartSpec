@@ -96,6 +96,32 @@
               </p>
             </div>
 
+            <!-- Token Estimation Display -->
+            <div class="form-group">
+              <div class="token-indicator" id="token-indicator" style="display: none;">
+                <div class="token-header">
+                  <strong>Token Estimation</strong>
+                  <button id="toggle-token-details" class="btn-link">Show Details</button>
+                </div>
+                <div class="token-summary">
+                  <span id="token-count">0</span> / <span id="token-limit">8,192</span> tokens
+                  <div class="token-bar">
+                    <div class="token-bar-fill" id="token-bar-fill" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div id="token-warning" class="token-warning" style="display: none;"></div>
+                <div id="token-details" class="token-details" style="display: none;">
+                  <p><strong>Breakdown:</strong></p>
+                  <ul>
+                    <li>System prompt: <span id="token-system">0</span></li>
+                    <li>Your message: <span id="token-user">0</span></li>
+                    <li>Current spec: <span id="token-spec">0</span></li>
+                    <li>Response (est.): <span id="token-response">0</span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
             <div class="form-group">
               <label>
                 <input type="checkbox" id="auto-refine">
