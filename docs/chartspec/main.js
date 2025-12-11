@@ -59,6 +59,16 @@ function loadSettings() {
   if (savedModel) {
     state.customModel = savedModel;
     document.getElementById('model-input').value = savedModel;
+    
+    // Sync the dropdown to match the saved model
+    const modelSelect = document.getElementById('model-select');
+    const matchingOption = Array.from(modelSelect.options).find(opt => opt.value === savedModel);
+    if (matchingOption) {
+      modelSelect.value = savedModel;
+    } else if (savedModel) {
+      // If custom model doesn't match predefined options, select 'custom'
+      modelSelect.value = 'custom';
+    }
   }
   
   // Update model input placeholder with default for current provider
