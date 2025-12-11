@@ -10,6 +10,9 @@ import { PlotlyRenderer } from './renderers/PlotlyRenderer.js';
 import { D3Renderer } from './renderers/D3Renderer.js';
 import { getTokenBreakdown, getTokenLimit, checkTokenUsage } from './tokenCounter.js';
 
+// Configuration constants
+const DEFAULT_SAMPLE_ROW_COUNT = 5; // Number of sample rows to send with LLM requests
+
 // Application state
 let state = {
   datasets: [],
@@ -479,7 +482,7 @@ async function handleSendMessage() {
     // Get dataset info
     const dataset = state.datasets.find(d => d.name === state.selectedDataset);
     const columns = dataset.columns;
-    const sampleRows = state.currentRows.slice(0, 5);
+    const sampleRows = state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT);
     
     // Get chart spec from LLM
     const spec = await getUpdatedChartSpec(
@@ -643,7 +646,7 @@ function updateTokenEstimation() {
   // Get token breakdown
   const breakdown = getTokenBreakdown({
     columns: dataset.columns,
-    sampleRows: state.currentRows.slice(0, 5),
+    sampleRows: state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT),
     userMessage,
     currentSpec: state.currentSpec
   });

@@ -207,7 +207,14 @@ export class PlotlyRenderer extends BaseRenderer {
   renderFallbackWarning(container, rows, spec, facetValue) {
     const warningDiv = document.createElement('div');
     warningDiv.className = 'plotly-fallback-warning';
-    warningDiv.innerHTML = '<strong>⚠️ Plotly Not Available:</strong> Displaying data as a table instead. To see charts, ensure you have internet connectivity and reload the page.';
+    
+    const strong = document.createElement('strong');
+    strong.textContent = '⚠️ Plotly Not Available:';
+    warningDiv.appendChild(strong);
+    
+    const message = document.createTextNode(' Displaying data as a table instead. To see charts, ensure you have internet connectivity and reload the page.');
+    warningDiv.appendChild(message);
+    
     container.appendChild(warningDiv);
     
     // Render as table

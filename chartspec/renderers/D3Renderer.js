@@ -113,6 +113,8 @@ export class D3Renderer extends BaseRenderer {
    * Render bar chart with D3
    */
   renderBarChart(svg, rows, spec, width, height) {
+    if (rows.length === 0) return;
+    
     const xValues = rows.map(r => r[spec.x]);
     const yValues = rows.map(r => parseFloat(r[spec.y]) || 0);
     
@@ -122,9 +124,11 @@ export class D3Renderer extends BaseRenderer {
       .range([0, width])
       .padding(0.2);
     
-    // Y scale
+    // Y scale with safe domain
+    const yMax = d3.max(yValues) || 0;
+    const yMin = d3.min(yValues) || 0;
     const y = d3.scaleLinear()
-      .domain([0, d3.max(yValues)])
+      .domain([Math.min(0, yMin), Math.max(0, yMax)])
       .range([height, 0]);
     
     // Add bars
@@ -172,17 +176,21 @@ export class D3Renderer extends BaseRenderer {
    * Render line chart with D3
    */
   renderLineChart(svg, rows, spec, width, height) {
+    if (rows.length === 0) return;
+    
     const xValues = rows.map((r, i) => spec.x ? r[spec.x] : i);
     const yValues = rows.map(r => parseFloat(r[spec.y]) || 0);
     
     // X scale (assume ordinal/index for simplicity)
     const x = d3.scaleLinear()
-      .domain([0, xValues.length - 1])
+      .domain([0, Math.max(1, xValues.length - 1)])
       .range([0, width]);
     
-    // Y scale
+    // Y scale with safe domain
+    const yMax = d3.max(yValues) || 0;
+    const yMin = d3.min(yValues) || 0;
     const y = d3.scaleLinear()
-      .domain([0, d3.max(yValues)])
+      .domain([Math.min(0, yMin), Math.max(0, yMax)])
       .range([height, 0]);
     
     // Line generator
@@ -222,18 +230,24 @@ export class D3Renderer extends BaseRenderer {
    * Render scatter chart with D3
    */
   renderScatterChart(svg, rows, spec, width, height) {
+    if (rows.length === 0) return;
+    
     const xValues = rows.map(r => parseFloat(r[spec.x]) || 0);
     const yValues = rows.map(r => parseFloat(r[spec.y]) || 0);
     
-    // X scale
+    // X scale with safe extent
+    const xExtent = d3.extent(xValues);
     const x = d3.scaleLinear()
-      .domain([d3.min(xValues), d3.max(xValues)])
-      .range([0, width]);
+      .domain([xExtent[0] || 0, xExtent[1] || 1])
+      .range([0, width])
+      .nice();
     
-    // Y scale
+    // Y scale with safe extent
+    const yExtent = d3.extent(yValues);
     const y = d3.scaleLinear()
-      .domain([d3.min(yValues), d3.max(yValues)])
-      .range([height, 0]);
+      .domain([yExtent[0] || 0, yExtent[1] || 1])
+      .range([height, 0])
+      .nice();
     
     // Add dots
     svg.selectAll('.dot')

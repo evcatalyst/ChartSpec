@@ -7,6 +7,13 @@
  * Uses a simple heuristic: ~4 characters per token on average
  * This is a conservative estimate for GPT-style models
  * 
+ * NOTE: This is an approximation and may differ significantly from
+ * actual tokenization, especially for:
+ * - Non-English text (can be 2-6 chars/token)
+ * - Code or structured data
+ * - Special characters and emojis
+ * For exact counts, use the actual tiktoken library (requires WASM)
+ * 
  * @param {string} text - Text to count tokens for
  * @returns {number} Estimated token count
  */
@@ -133,6 +140,9 @@ export function checkTokenUsage(tokenCount, limit) {
   };
 }
 
+// Configuration constants
+const ESTIMATED_TOKENS_PER_ROW = 30; // Approximate tokens per sample data row
+
 /**
  * Suggest optimizations to reduce token usage
  * @param {Object} breakdown - Token breakdown from getTokenBreakdown
@@ -143,7 +153,7 @@ export function suggestOptimizations(breakdown, currentSampleCount) {
   const suggestions = [];
   
   if (currentSampleCount > 3) {
-    const savings = Math.floor((currentSampleCount - 3) * 30); // ~30 tokens per row
+    const savings = Math.floor((currentSampleCount - 3) * ESTIMATED_TOKENS_PER_ROW);
     suggestions.push({
       action: 'reduce_samples',
       description: `Reduce sample rows from ${currentSampleCount} to 3`,
