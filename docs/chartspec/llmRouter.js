@@ -96,6 +96,10 @@ function parseJSONResponse(text) {
 async function callLLM(provider, apiKey, messages, customModel = null) {
   let url, headers, body;
   
+  // Validate provider before accessing DEFAULT_MODELS
+  if (!Object.prototype.hasOwnProperty.call(DEFAULT_MODELS, provider)) {
+    throw new Error(`Unsupported provider: ${provider}`);
+  }
   // Use custom model if provided, otherwise use default for provider
   const model = customModel || DEFAULT_MODELS[provider];
   
