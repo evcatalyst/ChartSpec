@@ -238,6 +238,18 @@ API keys are:
 
 **Important**: API keys require payment/credits with the provider.
 
+### Model Selection
+
+ChartSpec allows you to select which model to use:
+
+**Default Models:**
+- **OpenAI**: `gpt-4o-mini` (recommended for cost-effectiveness)
+- **Grok**: `grok-3` (recommended, replaces deprecated `grok-beta`)
+
+**Note**: The `grok-beta` model has been deprecated by X.AI and will return errors. Please use `grok-3` or other current Grok models instead.
+
+You can also specify custom models in the settings. The app provides a dropdown with common models and a freeform input for custom model names.
+
 ## GitHub Pages Deployment
 
 This application is designed to work with GitHub Pages.

@@ -3,7 +3,7 @@
 import { autoRegisterDemoDatasets, getDatasets, registerDataset, getDatasetRows, deleteDataset } from './datasetRegistry.js';
 import { applySpecToRows } from './dataEngine.js';
 import { renderChart } from './chartRenderer.js';
-import { getUpdatedChartSpec, refineChartSpec } from './llmRouter.js';
+import { getUpdatedChartSpec, refineChartSpec, DEFAULT_MODELS } from './llmRouter.js';
 
 // Application state
 let state = {
@@ -13,7 +13,8 @@ let state = {
   currentSpec: null,
   chatHistory: [],
   provider: 'openai',
-  apiKey: ''
+  apiKey: '',
+  customModel: ''  // Custom model override, empty means use default
 };
 
 /**
@@ -43,6 +44,7 @@ export async function init() {
 function loadSettings() {
   const savedProvider = localStorage.getItem('chartspec_provider');
   const savedApiKey = localStorage.getItem('chartspec_apikey');
+  const savedModel = localStorage.getItem('chartspec_model');
   
   if (savedProvider) {
     state.provider = savedProvider;
@@ -53,6 +55,33 @@ function loadSettings() {
     state.apiKey = savedApiKey;
     document.getElementById('api-key').value = savedApiKey;
   }
+  
+  if (savedModel) {
+    state.customModel = savedModel;
+    document.getElementById('model-input').value = savedModel;
+    
+    // Ensure 'custom' option exists in the dropdown
+    const modelSelect = document.getElementById('model-select');
+    let customOption = Array.from(modelSelect.options).find(opt => opt.value === 'custom');
+    if (!customOption) {
+      // Add 'custom' option if missing
+      const option = document.createElement('option');
+      option.value = 'custom';
+      option.text = 'Custom';
+      modelSelect.appendChild(option);
+    }
+    // Sync the dropdown to match the saved model
+    const matchingOption = Array.from(modelSelect.options).find(opt => opt.value === savedModel);
+    if (matchingOption) {
+      modelSelect.value = savedModel;
+    } else if (savedModel) {
+      // If custom model doesn't match predefined options, select 'custom'
+      modelSelect.value = 'custom';
+    }
+  }
+  
+  // Update model input placeholder with default for current provider
+  updateModelPlaceholder();
 }
 
 /**
@@ -61,6 +90,44 @@ function loadSettings() {
 function saveSettings() {
   localStorage.setItem('chartspec_provider', state.provider);
   localStorage.setItem('chartspec_apikey', state.apiKey);
+  localStorage.setItem('chartspec_model', state.customModel);
+}
+
+/**
+ * Update model input placeholder with default for current provider
+ */
+function updateModelPlaceholder() {
+  const modelInput = document.getElementById('model-input');
+  if (modelInput) {
+    const defaultModel = DEFAULT_MODELS[state.provider] || '';
+    modelInput.placeholder = `Default: ${defaultModel}`;
+  }
+}
+
+/**
+ * Handle model dropdown selection
+ */
+function handleModelSelect(e) {
+  const selectedModel = e.target.value;
+  const modelInput = document.getElementById('model-input');
+  
+  if (selectedModel === 'custom') {
+    // Keep current custom value or empty
+    modelInput.focus();
+  } else if (selectedModel === 'default') {
+    // Clear custom model to use provider default
+    state.customModel = '';
+    modelInput.value = '';
+  } else {
+    // Set to selected model
+    state.customModel = selectedModel;
+    modelInput.value = selectedModel;
+  }
+  
+  // Save settings once after all updates
+  if (selectedModel !== 'custom') {
+    saveSettings();
+  }
 }
 
 /**
@@ -78,11 +145,20 @@ function setupEventListeners() {
   // LLM settings
   document.getElementById('llm-provider').addEventListener('change', (e) => {
     state.provider = e.target.value;
+    updateModelPlaceholder();
     saveSettings();
   });
   
   document.getElementById('api-key').addEventListener('input', (e) => {
     state.apiKey = e.target.value;
+    saveSettings();
+  });
+  
+  // Model selection
+  document.getElementById('model-select').addEventListener('change', handleModelSelect);
+  
+  document.getElementById('model-input').addEventListener('input', (e) => {
+    state.customModel = e.target.value;
     saveSettings();
   });
   
@@ -290,14 +366,16 @@ async function handleSendMessage() {
     const columns = dataset.columns;
     const sampleRows = state.currentRows.slice(0, 5);
     
-    // Get chart spec from LLM
+    // Get chart spec from LLM (use custom model if specified)
+    const modelToUse = state.customModel || null;
     const spec = await getUpdatedChartSpec(
       state.provider,
       state.apiKey,
       userMessage,
       columns,
       sampleRows,
-      state.currentSpec
+      state.currentSpec,
+      modelToUse
     );
     
     // Update chat with spec
@@ -343,14 +421,16 @@ async function handleAutoRefine(spec, columns, sampleRows) {
     
     const imageDataUrl = await Plotly.toImage(plotlyDiv, { format: 'png', width: 800, height: 600 });
     
-    // Get refined spec
+    // Get refined spec (use custom model if specified)
+    const modelToUse = state.customModel || null;
     const refinedSpec = await refineChartSpec(
       state.provider,
       state.apiKey,
       spec,
       imageDataUrl,
       columns,
-      sampleRows
+      sampleRows,
+      modelToUse
     );
     
     // Apply refined spec
