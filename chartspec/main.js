@@ -5,6 +5,13 @@ import { applySpecToRows } from './dataEngine.js';
 import { renderChart } from './chartRenderer.js';
 import { getUpdatedChartSpec, refineChartSpec } from './llmRouter.js';
 import { sampleLocalSpec, validChartTypes } from './chartSpec.js';
+import { rendererFactory } from './rendererFactory.js';
+import { PlotlyRenderer } from './renderers/PlotlyRenderer.js';
+import { D3Renderer } from './renderers/D3Renderer.js';
+import { getTokenBreakdown, getTokenLimit, checkTokenUsage } from './tokenCounter.js';
+
+// Configuration constants
+const DEFAULT_SAMPLE_ROW_COUNT = 5; // Number of sample rows to send with LLM requests
 
 // Application state
 let state = {
@@ -16,7 +23,8 @@ let state = {
   provider: 'openai',
   apiKey: '',
   localMode: false,
-  manualChartSpec: null
+  manualChartSpec: null,
+  currentRenderer: 'plotly' // Default renderer
 };
 
 /**
@@ -24,6 +32,9 @@ let state = {
  */
 export async function init() {
   console.log('Initializing ChartSpec application...');
+  
+  // Initialize renderers
+  initializeRenderers();
   
   // Auto-register demo datasets
   await autoRegisterDemoDatasets();
@@ -38,6 +49,21 @@ export async function init() {
   setupEventListeners();
   
   console.log('ChartSpec application initialized');
+}
+
+/**
+ * Initialize and register renderers
+ */
+function initializeRenderers() {
+  // Register Plotly renderer (default)
+  rendererFactory.register(new PlotlyRenderer(), true);
+  
+  // Register D3 renderer (alternative)
+  rendererFactory.register(new D3Renderer(), false);
+  
+  // Log available renderers
+  const renderers = rendererFactory.listRenderers();
+  console.log('Available renderers:', renderers);
 }
 
 /**
@@ -113,12 +139,16 @@ function setupEventListeners() {
   document.getElementById('llm-provider').addEventListener('change', (e) => {
     state.provider = e.target.value;
     saveSettings();
+    updateTokenEstimation();
   });
   
   document.getElementById('api-key').addEventListener('input', (e) => {
     state.apiKey = e.target.value;
     saveSettings();
   });
+  
+  // Token details toggle
+  document.getElementById('toggle-token-details').addEventListener('click', toggleTokenDetails);
   
   // Local mode toggle
   document.getElementById('local-mode').addEventListener('change', handleLocalModeToggle);
@@ -138,6 +168,9 @@ function setupEventListeners() {
       handleSendMessage();
     }
   });
+  
+  // Update token estimation as user types
+  document.getElementById('user-message').addEventListener('input', updateTokenEstimation);
   
   document.getElementById('clear-chat-btn').addEventListener('click', handleClearChat);
 }
@@ -250,6 +283,7 @@ function handleDatasetSelection(e) {
   state.selectedDataset = datasetName;
   state.currentRows = getDatasetRows(datasetName);
   updateDatasetInfo();
+  updateTokenEstimation();
   
   console.log(`Loaded dataset: ${datasetName} (${state.currentRows.length} rows)`);
 }
@@ -396,9 +430,10 @@ function handleApplyChartSpec() {
   
   console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
   
-  // Render chart
+  // Render chart using renderer factory
   const vizContainer = document.getElementById('visualization');
-  renderChart(vizContainer, transformedRows, spec);
+  const renderer = rendererFactory.getBestRenderer(spec.chartType);
+  renderer.renderChart(vizContainer, transformedRows, spec);
   
   // Add message to chat
   addChatMessage('assistant', `Applied ChartSpec in local mode:\n${JSON.stringify(spec, null, 2)}`);
@@ -447,7 +482,7 @@ async function handleSendMessage() {
     // Get dataset info
     const dataset = state.datasets.find(d => d.name === state.selectedDataset);
     const columns = dataset.columns;
-    const sampleRows = state.currentRows.slice(0, 5);
+    const sampleRows = state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT);
     
     // Get chart spec from LLM
     const spec = await getUpdatedChartSpec(
@@ -472,9 +507,10 @@ async function handleSendMessage() {
     
     console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
     
-    // Render chart
+    // Render chart using renderer factory
     const vizContainer = document.getElementById('visualization');
-    renderChart(vizContainer, transformedRows, spec);
+    const renderer = rendererFactory.getBestRenderer(spec.chartType);
+    renderer.renderChart(vizContainer, transformedRows, spec);
     
     // Optional auto-refine
     const autoRefine = document.getElementById('auto-refine')?.checked;
@@ -515,7 +551,8 @@ async function handleAutoRefine(spec, columns, sampleRows) {
     // Apply refined spec
     state.currentSpec = refinedSpec;
     const transformedRows = applySpecToRows(state.currentRows, refinedSpec);
-    renderChart(vizContainer, transformedRows, refinedSpec);
+    const renderer = rendererFactory.getBestRenderer(refinedSpec.chartType);
+    renderer.renderChart(vizContainer, transformedRows, refinedSpec);
     
     addChatMessage('assistant', `Auto-refined chart with improved settings.`);
     
@@ -585,6 +622,87 @@ function handleClearChat() {
   state.currentSpec = null;
   document.getElementById('chat-log').innerHTML = '';
   document.getElementById('visualization').innerHTML = '<p class="placeholder">No visualization yet</p>';
+  updateTokenEstimation();
+}
+
+/**
+ * Update token estimation display
+ */
+function updateTokenEstimation() {
+  // Only show token estimation when not in local mode and dataset is selected
+  if (state.localMode || !state.selectedDataset) {
+    document.getElementById('token-indicator').style.display = 'none';
+    return;
+  }
+  
+  const userMessage = document.getElementById('user-message').value.trim() || 'example request';
+  const dataset = state.datasets.find(d => d.name === state.selectedDataset);
+  
+  if (!dataset) {
+    document.getElementById('token-indicator').style.display = 'none';
+    return;
+  }
+  
+  // Get token breakdown
+  const breakdown = getTokenBreakdown({
+    columns: dataset.columns,
+    sampleRows: state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT),
+    userMessage,
+    currentSpec: state.currentSpec
+  });
+  
+  // Get token limit
+  const limit = getTokenLimit(state.provider);
+  
+  // Check usage
+  const usage = checkTokenUsage(breakdown.total, limit);
+  
+  // Update UI
+  document.getElementById('token-indicator').style.display = 'block';
+  document.getElementById('token-count').textContent = breakdown.total.toLocaleString();
+  document.getElementById('token-limit').textContent = limit.toLocaleString();
+  
+  // Update progress bar
+  const fillElement = document.getElementById('token-bar-fill');
+  fillElement.style.width = `${usage.percentage}%`;
+  fillElement.className = 'token-bar-fill';
+  
+  if (usage.percentage > 80) {
+    fillElement.classList.add('danger');
+  } else if (usage.percentage > 60) {
+    fillElement.classList.add('warning');
+  }
+  
+  // Update warning
+  const warningElement = document.getElementById('token-warning');
+  if (usage.warning) {
+    warningElement.textContent = usage.warning;
+    warningElement.style.display = 'block';
+  } else {
+    warningElement.style.display = 'none';
+  }
+  
+  // Update breakdown details
+  document.getElementById('token-system').textContent = breakdown.breakdown.systemPrompt;
+  document.getElementById('token-user').textContent = breakdown.breakdown.userMessage;
+  document.getElementById('token-spec').textContent = breakdown.breakdown.currentSpec;
+  document.getElementById('token-response').textContent = breakdown.breakdown.estimatedResponse;
+}
+
+/**
+ * Toggle token details visibility
+ */
+function toggleTokenDetails() {
+  const detailsElement = document.getElementById('token-details');
+  const toggleButton = document.getElementById('toggle-token-details');
+  
+  if (detailsElement.style.display === 'none') {
+    detailsElement.style.display = 'block';
+    toggleButton.textContent = 'Hide Details';
+  } else {
+    detailsElement.style.display = 'none';
+    toggleButton.textContent = 'Show Details';
+  }
 }
 
 // Initialize on load

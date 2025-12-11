@@ -1,6 +1,6 @@
 # ChartSpec
 
-AI-powered data visualization assistant for browser-based chart creation. ChartSpec uses LLMs (OpenAI/Grok) to generate chart specifications from natural language, then renders them with Plotly.js.
+AI-powered data visualization assistant for browser-based chart creation. ChartSpec uses LLMs (OpenAI/Grok) to generate chart specifications from natural language, then renders them with multiple visualization libraries.
 
 ## Features
 
@@ -12,6 +12,8 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 - 🔌 **Multiple LLM Providers**: Support for OpenAI and Grok (X.AI)
 - 📁 **Dataset Management**: Upload and manage CSV datasets locally
 - 🎯 **Faceted Charts**: Create small multiples for data comparison
+- 🔧 **Renderer Abstraction**: Support for multiple visualization libraries (Plotly, D3)
+- 📊 **Token Estimation**: Real-time token usage tracking to optimize LLM costs
 
 ## Getting Started
 
@@ -41,6 +43,12 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 - **Grok**: `grok-3` (replaces deprecated `grok-beta`)
 
 **Note**: The `grok-beta` model has been deprecated by X.AI. If you encounter errors about model availability, use `grok-3` or other current models instead.
+
+**Token Estimation:**
+- ChartSpec now displays real-time token usage estimates
+- See breakdown of system prompt, your message, and response tokens
+- Get warnings when approaching token limits
+- Helps optimize costs and stay within model limits
 
 ### 3. Load a Dataset
 
@@ -261,17 +269,48 @@ ChartSpec requires a modern browser with support for:
 
 ## Development
 
+### Architecture Overview
+
+ChartSpec uses a modular architecture with clear separation of concerns:
+
+**Renderer Abstraction Layer:**
+- `rendererFactory.js` - Factory pattern for managing multiple renderers
+- `renderers/PlotlyRenderer.js` - Plotly.js implementation
+- `renderers/D3Renderer.js` - D3.js implementation (skeleton)
+- Allows easy switching between visualization libraries
+- Automatic fallback when primary renderer unavailable
+
+**Data Pipeline:**
+1. Dataset loaded from CSV
+2. Filters applied (array, equality, operator)
+3. GroupBy and aggregations
+4. Sorting and limiting
+5. Faceting (if specified)
+6. Rendering with selected renderer
+
+**Token Management:**
+- `tokenCounter.js` - Estimates token usage for LLM requests
+- Real-time feedback as users type
+- Breakdown by component (system, user, spec, response)
+- Provider-specific limits (OpenAI, Grok)
+
 ### File Structure
 
 ```
 ChartSpec/
 ├── index.html              # Main HTML file
 ├── styles.css              # Responsive styles
+├── ROADMAP.md             # Development roadmap
 ├── chartspec/              # Application modules
 │   ├── chartSpec.js        # Schema definition
 │   ├── dataEngine.js       # Data transformations
 │   ├── datasetRegistry.js  # Dataset management
-│   ├── chartRenderer.js    # Plotly rendering
+│   ├── chartRenderer.js    # Legacy renderer (deprecated)
+│   ├── rendererFactory.js  # Renderer abstraction
+│   ├── renderers/
+│   │   ├── PlotlyRenderer.js  # Plotly implementation
+│   │   └── D3Renderer.js      # D3 implementation
+│   ├── tokenCounter.js     # Token estimation
 │   ├── llmRouter.js        # LLM integration
 │   └── main.js             # Application orchestration
 └── datasets/               # Demo datasets
@@ -281,8 +320,13 @@ ChartSpec/
 
 ### Extending ChartSpec
 
+**Add new renderers:**
+1. Create a new class extending `BaseRenderer` in `chartspec/renderers/`
+2. Implement required methods: `getName()`, `supports()`, `isAvailable()`, `validate()`, `renderSingleChart()`
+3. Register in `main.js` with `rendererFactory.register(new YourRenderer())`
+
 **Add new chart types:**
-Edit `chartRenderer.js` to add support for additional Plotly chart types.
+Update the renderer implementation to support additional chart types.
 
 **Add new LLM providers:**
 Edit `llmRouter.js` to add API integration for new providers.
