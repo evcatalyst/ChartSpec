@@ -73,9 +73,67 @@ Transform ChartSpec into a comprehensive, production-ready charting assistant th
 
 ---
 
+### 4. Local LLM Evaluation ✅ Complete
+**Status**: Complete (December 2024)  
+**Goal**: Evaluate transformers.js for browser-based local LLM mode
+
+**Completed Work**:
+- ✅ Researched transformers.js and ONNX Runtime Web
+- ✅ Identified decoder-style instruction-tuned models
+- ✅ Evaluated SmolLM2 family (135M, 360M, 1.7B)
+- ✅ Evaluated SmolLM3-3B variant
+- ✅ Evaluated Phi-3 variants (mini, 3.5)
+- ✅ Evaluated Gemma-2/3 variants
+- ✅ Tested quality, performance, and resource usage
+- ✅ Created comprehensive documentation (47KB total)
+
+**Key Findings**:
+- **Recommended Primary**: SmolLM2-1.7B-Instruct (900MB, 8.5/10 quality)
+- **Recommended Lightweight**: SmolLM2-360M-Instruct (180MB, 7/10 quality)
+- **Recommended Advanced**: Phi-3-mini-4k-instruct (2.2GB, 9.5/10 quality)
+
+**Documentation**:
+- [Local LLM Evaluation](docs/LOCAL_LLM_EVALUATION.md) - Full analysis
+- [Model Comparison Snapshots](docs/MODEL_COMPARISON_SNAPSHOTS.md) - Test results
+- [Quick Reference Guide](docs/LOCAL_LLM_QUICK_REFERENCE.md) - Implementation guide
+
+**Next Steps for Implementation**:
+1. Install `@huggingface/transformers` package
+2. Create `localLLM.js` module with SmolLM2-1.7B
+3. Add local/cloud mode toggle in UI
+4. Implement progressive loading with Web Workers
+5. Add model selection (360M, 1.7B, Phi-3)
+6. Test cross-browser compatibility
+
+---
+
 ## Mid-Term Goals (Next 2-4 Weeks)
 
-### 4. Insights Panel & Recommendations
+### 5. Local LLM Implementation
+**Status**: Planned (Ready for Implementation)  
+**Goal**: Implement browser-based local LLM using transformers.js
+
+**Implementation Priority**: High (evaluation complete, roadmap clear)
+
+**Features**:
+- Browser-based LLM inference with transformers.js
+- Multiple model sizes (lightweight, balanced, advanced)
+- WebGPU acceleration with CPU fallback
+- Progressive loading with caching
+- Zero API costs and complete privacy
+
+**Files to Create/Modify**:
+- New: `/chartspec/localLLM.js` (model loading and inference)
+- Modify: `/chartspec/llmRouter.js` (add local mode integration)
+- Modify: `/index.html` (add local mode UI)
+- Modify: `/styles.css` (loading progress styles)
+- Modify: `/chartspec/main.js` (local mode event handlers)
+
+**Timeline**: 1-2 weeks for basic implementation
+
+---
+
+### 6. Insights Panel & Recommendations
 **Status**: Planned  
 **Goal**: Provide AI-powered chart improvement suggestions
 
@@ -111,7 +169,7 @@ Transform ChartSpec into a comprehensive, production-ready charting assistant th
 
 ---
 
-### 5. UI/UX Modernization
+### 7. UI/UX Modernization
 **Status**: Planned  
 **Goal**: Move beyond generic Bootstrap look to polished, modern design
 
@@ -145,7 +203,7 @@ Transform ChartSpec into a comprehensive, production-ready charting assistant th
 
 ---
 
-### 6. Enhanced Model Configuration
+### 8. Enhanced Model Configuration
 **Status**: Partially Complete  
 **Goal**: Robust multi-provider, multi-model support
 
@@ -153,6 +211,7 @@ Transform ChartSpec into a comprehensive, production-ready charting assistant th
 - ✅ Provider selection (OpenAI, Grok)
 - ✅ Model defaults (gpt-4o-mini, grok-3)
 - ✅ localStorage persistence
+- ✅ Local LLM evaluation complete
 - ⚠️ Limited error handling
 
 **Improvements Needed**:
@@ -162,6 +221,7 @@ Transform ChartSpec into a comprehensive, production-ready charting assistant th
 - Rate limit handling
 - Cost estimation per model
 - Model capability indicators (vision, tokens, etc.)
+- Local LLM model selection (360M, 1.7B, Phi-3)
 
 **Files to Modify**:
 - Modify: `/chartspec/llmRouter.js` (model config, error handling)
@@ -288,13 +348,13 @@ For specific roadmap items, check the GitHub Issues tagged with roadmap mileston
 
 ## Milestones
 
-- **v0.2.0** - Renderer Abstraction + Token Counting (Current)
-- **v0.3.0** - Insights Panel + UI Modernization
-- **v0.4.0** - Enhanced Model Configuration
-- **v0.5.0** - D3 Renderer + Advanced Data Pipeline
+- **v0.2.0** - Renderer Abstraction + Token Counting + Local LLM Evaluation (Current)
+- **v0.3.0** - Local LLM Implementation + Multi-Model Support
+- **v0.4.0** - Insights Panel + UI Modernization
+- **v0.5.0** - Enhanced Model Configuration + D3 Renderer
 - **v1.0.0** - Production-Ready Release
 
 ---
 
-**Last Updated**: December 11, 2024  
+**Last Updated**: December 12, 2024  
 **Maintained By**: ChartSpec Team
