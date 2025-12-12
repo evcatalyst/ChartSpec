@@ -438,7 +438,9 @@ export class D3Renderer extends BaseRenderer {
       .style('font-size', '12px')
       .style('fill', 'white')
       .text(d => {
-        const percent = ((d.data.value / d3.sum(pieData, p => p.value)) * 100).toFixed(1);
+        const total = d3.sum(pieData, p => p.value);
+        if (total === 0) return d.data.label; // Avoid division by zero
+        const percent = ((d.data.value / total) * 100).toFixed(1);
         return `${d.data.label}: ${percent}%`;
       });
   }
