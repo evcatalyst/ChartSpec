@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="./styles.css">
   <!-- Plotly.js from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
+  <!-- D3.js from CDN (fallback renderer) -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- AVA from CDN for intelligent chart recommendations -->
+  <script src="https://unpkg.com/@antv/ava@latest/dist/index.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -69,49 +73,90 @@
           <h2>LLM Settings</h2>
           
           <div class="form-group">
-            <label for="llm-provider">Provider:</label>
-            <select id="llm-provider" class="form-control">
-              <option value="openai">OpenAI</option>
-              <option value="grok">Grok (X.AI)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="api-key">API Key:</label>
-            <input type="password" id="api-key" class="form-control" placeholder="Enter your API key">
+            <label>
+              <input type="checkbox" id="local-mode">
+              <strong>Local Mode (No LLM)</strong>
+            </label>
             <p class="note">
-              <strong>Security:</strong> Never commit API keys to repositories. 
-              Keys are stored in browser localStorage only.
-            </p>
-          </div>
-
-          <div class="form-group">
-            <label for="model-select">Model:</label>
-            <select id="model-select" class="form-control">
-              <option value="default">Use Provider Default</option>
-              <option value="gpt-4o-mini">OpenAI: gpt-4o-mini</option>
-              <option value="gpt-4o">OpenAI: gpt-4o</option>
-              <option value="grok-3">Grok: grok-3</option>
-              <option value="grok-2-latest">Grok: grok-2-latest</option>
-              <option value="custom">Custom (enter below)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="model-input">Custom Model:</label>
-            <input type="text" id="model-input" class="form-control" placeholder="Default: gpt-4o-mini">
-            <p class="note">
-              Leave blank to use provider default. 
-              OpenAI default: <strong>gpt-4o-mini</strong>, Grok default: <strong>grok-3</strong>
-              (grok-beta is deprecated).
+              Skip LLM and use manual ChartSpec JSON. API key not required.
             </p>
           </div>
 
           <div class="form-group">
             <label>
-              <input type="checkbox" id="auto-refine">
-              Auto-refine charts (experimental)
+              <input type="checkbox" id="smart-mode">
+              <strong>Smart Mode (AVA-Powered)</strong>
             </label>
+            <p class="note">
+              Use AVA for intelligent chart selection and local language parser. 
+              No API key required. <a href="#" id="show-vocab-help" class="help-link">View Commands</a>
+            </p>
+          </div>
+
+          <div id="llm-config">
+            <div class="form-group">
+              <label for="llm-provider">Provider:</label>
+              <select id="llm-provider" class="form-control">
+                <option value="openai">OpenAI</option>
+                <option value="grok">Grok (X.AI)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="api-key">API Key:</label>
+              <input type="password" id="api-key" class="form-control" placeholder="Enter your API key">
+              <p class="note">
+                <strong>Security:</strong> Never commit API keys to repositories. 
+                Keys are stored in browser localStorage only.
+              </p>
+            </div>
+
+            <!-- Token Estimation Display -->
+            <div class="form-group">
+              <div class="token-indicator" id="token-indicator" style="display: none;">
+                <div class="token-header">
+                  <strong>Token Estimation</strong>
+                  <button id="toggle-token-details" class="btn-link">Show Details</button>
+                </div>
+                <div class="token-summary">
+                  <span id="token-count">0</span> / <span id="token-limit">8,192</span> tokens
+                  <div class="token-bar">
+                    <div class="token-bar-fill" id="token-bar-fill" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div id="token-warning" class="token-warning" style="display: none;"></div>
+                <div id="token-details" class="token-details" style="display: none;">
+                  <p><strong>Breakdown:</strong></p>
+                  <ul>
+                    <li>System prompt: <span id="token-system">0</span></li>
+                    <li>Your message: <span id="token-user">0</span></li>
+                    <li>Current spec: <span id="token-spec">0</span></li>
+                    <li>Response (est.): <span id="token-response">0</span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="auto-refine">
+                Auto-refine charts (experimental)
+              </label>
+            </div>
+          </div>
+
+          <div id="local-mode-config" style="display: none;">
+            <div class="form-group">
+              <label for="chartspec-input">ChartSpec JSON:</label>
+              <textarea id="chartspec-input" class="form-control chartspec-textarea" rows="15" placeholder="Enter ChartSpec JSON..."></textarea>
+              <p id="chartspec-error" class="error-message" style="display: none;"></p>
+              <p class="note">
+                Edit the ChartSpec JSON directly. Click "Apply ChartSpec" to render.
+              </p>
+            </div>
+            <div class="button-group">
+              <button id="apply-chartspec-btn" class="btn btn-primary">Apply ChartSpec</button>
+            </div>
           </div>
         </section>
       </aside>
@@ -132,6 +177,10 @@
               class="form-control" 
               placeholder="Ask for a chart... (e.g., 'Show revenue by region as a bar chart')"
               rows="3"></textarea>
+            <div id="smart-mode-hints" class="smart-mode-hints" style="display: none;">
+              <p class="hint-label">💡 Smart Mode Active - Try:</p>
+              <div id="command-suggestions" class="command-suggestions"></div>
+            </div>
             <div class="button-group">
               <button id="send-message-btn" class="btn btn-primary">Send</button>
               <button id="clear-chat-btn" class="btn btn-secondary">Clear Chat</button>
@@ -153,6 +202,19 @@
     <footer class="app-footer">
       <p>ChartSpec - Browser-based data visualization with AI assistance</p>
     </footer>
+  </div>
+
+  <!-- Vocabulary Help Modal -->
+  <div id="vocab-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Smart Mode Command Vocabulary</h2>
+        <button id="close-vocab-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="vocab-help-content">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
   </div>
 
   <!-- Load main application as ES module -->
