@@ -53,3 +53,21 @@ export const defaultSpec = {
   layout: {},
   config: { responsive: true }
 };
+
+export const sampleLocalSpec = {
+  title: "Revenue by Region",
+  description: "Sample bar chart showing revenue by region",
+  chartType: "bar",
+  x: "Region",
+  y: "Revenue",
+  groupBy: {
+    columns: ["Region"],
+    aggregations: {
+      Revenue: { func: "sum" }
+    }
+  },
+  sort: { column: "Revenue", order: "desc" },
+  config: { responsive: true }
+};
+
+export const validChartTypes = ['bar', 'line', 'scatter', 'pie', 'histogram', 'box', 'heatmap', 'table', 'tableOnly', 'pivot'];
