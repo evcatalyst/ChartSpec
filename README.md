@@ -7,6 +7,7 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 ## Features
 
 - 🎨 **Natural Language Charting**: Describe your desired visualization in plain English
+- 🧠 **Smart Mode (NEW)**: API-less demo with AVA-powered chart selection and local language parser
 - 📊 **Multiple Chart Types**: Bar, line, scatter, pie, histogram, box plots, heatmaps, and tables
 - 🔄 **Data Transformations**: Filters, grouping, aggregations, sorting, and limiting
 - 📱 **Mobile-First Design**: Responsive layout that works on all devices
@@ -35,8 +36,12 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 - Deploy to GitHub Pages (see deployment section below)
 - Access via your GitHub Pages URL
 
-### 2. Configure LLM Access
+### 2. Choose Your Mode
 
+ChartSpec offers three modes of operation:
+
+#### 🤖 LLM Mode (Default)
+Full AI-powered natural language processing using OpenAI or Grok:
 1. Select your LLM provider (OpenAI or Grok)
 2. Enter your API key in the settings panel
 3. Optionally select a specific model (or use the provider default)
@@ -53,10 +58,43 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 **Note**: The `grok-beta` model has been deprecated by X.AI. If you encounter errors about model availability, use `grok-3` or other current models instead.
 
 **Token Estimation:**
-- ChartSpec now displays real-time token usage estimates
+- ChartSpec displays real-time token usage estimates
 - See breakdown of system prompt, your message, and response tokens
 - Get warnings when approaching token limits
 - Helps optimize costs and stay within model limits
+
+#### 🧠 Smart Mode (NEW - API-less)
+Intelligent chart creation without API keys using AVA and local language parsing:
+1. Check the "Smart Mode (AVA-Powered)" checkbox in LLM Settings
+2. Use discrete vocabulary commands (click "View Commands" for help)
+3. Get instant chart recommendations powered by AVA (AntV)
+4. See real-time command suggestions as you type
+
+**Benefits:**
+- ✅ No API key required - completely free
+- ✅ Instant responses - no network latency
+- ✅ Privacy-first - all processing in-browser
+- ✅ Intelligent recommendations via AVA
+- ✅ Perfect for demos and learning
+
+**Example Commands:**
+- `show bar chart of Revenue by Region`
+- `display line chart of Temperature`
+- `show pie chart grouped by Product`
+- `show top 10 by Revenue descending`
+
+📖 **Full documentation**: See [docs/SMART_MODE.md](docs/SMART_MODE.md) for complete vocabulary and usage guide.
+
+#### 📝 Local Mode
+Manual ChartSpec JSON editing for advanced users:
+1. Check the "Local Mode (No LLM)" checkbox
+2. Edit the ChartSpec JSON directly in the textarea
+3. Click "Apply ChartSpec" to render
+
+**Best for:**
+- Precise control over chart specifications
+- Learning the ChartSpec schema
+- Debugging and testing
 
 ### 3. Load a Dataset
 

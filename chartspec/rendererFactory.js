@@ -171,10 +171,15 @@ export class RendererFactory {
    * @returns {BaseRenderer} Best available renderer
    */
   getBestRenderer(chartType) {
-    // Try default renderer first
+    // Try default renderer first if available
     const defaultRenderer = this.getRenderer();
     if (defaultRenderer.isAvailable() && defaultRenderer.supports(chartType)) {
       return defaultRenderer;
+    }
+    
+    // If default renderer (Plotly) is not available, log and find alternative
+    if (!defaultRenderer.isAvailable()) {
+      console.warn(`Default renderer '${this.defaultRenderer}' is not available. Searching for alternatives...`);
     }
     
     // Find any available renderer that supports the chart type
@@ -185,7 +190,8 @@ export class RendererFactory {
       }
     }
     
-    // If no renderer supports it, return default (will handle error)
+    // If no renderer supports it or is available, return default (will show error/fallback)
+    console.warn(`No available renderer found for chart type: ${chartType}. Using default renderer (may show fallback).`);
     return defaultRenderer;
   }
 

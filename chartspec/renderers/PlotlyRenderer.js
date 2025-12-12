@@ -209,10 +209,10 @@ export class PlotlyRenderer extends BaseRenderer {
     warningDiv.className = 'plotly-fallback-warning';
     
     const strong = document.createElement('strong');
-    strong.textContent = '⚠️ Plotly Not Available:';
+    strong.textContent = '⚠️ Chart Rendering Issue:';
     warningDiv.appendChild(strong);
     
-    const message = document.createTextNode(' Displaying data as a table instead. To see charts, ensure you have internet connectivity and reload the page.');
+    const message = document.createTextNode(' Chart libraries (Plotly/D3) are not available. This usually means CDN access is blocked. Displaying data as a table instead. When deployed with internet connectivity, charts will render properly.');
     warningDiv.appendChild(message);
     
     container.appendChild(warningDiv);

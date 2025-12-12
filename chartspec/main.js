@@ -9,6 +9,8 @@ import { rendererFactory } from './rendererFactory.js';
 import { PlotlyRenderer } from './renderers/PlotlyRenderer.js';
 import { D3Renderer } from './renderers/D3Renderer.js';
 import { getTokenBreakdown, getTokenLimit, checkTokenUsage } from './tokenCounter.js';
+import { parseCommand, commandToSpec, getSuggestions, getCommandHelp } from './languageParser.js';
+import { getAvaRecommendation, enhanceWithAva, isAvaAvailable } from './avaIntegration.js';
 
 // Configuration constants
 const DEFAULT_SAMPLE_ROW_COUNT = 5; // Number of sample rows to send with LLM requests
@@ -23,6 +25,7 @@ let state = {
   provider: 'openai',
   apiKey: '',
   localMode: false,
+  smartMode: false,
   manualChartSpec: null,
   currentRenderer: 'plotly' // Default renderer
 };
@@ -73,6 +76,7 @@ function loadSettings() {
   const savedProvider = localStorage.getItem('chartspec_provider');
   const savedApiKey = localStorage.getItem('chartspec_apikey');
   const savedLocalMode = localStorage.getItem('chartspec_localmode');
+  const savedSmartMode = localStorage.getItem('chartspec_smartmode');
   const savedManualSpec = localStorage.getItem('chartspec_manualspec');
   
   if (savedProvider) {
@@ -90,6 +94,13 @@ function loadSettings() {
     state.localMode = true;
     document.getElementById('local-mode').checked = true;
     updateLocalModeUI();
+  }
+  
+  // Load smart mode state
+  if (savedSmartMode === 'true') {
+    state.smartMode = true;
+    document.getElementById('smart-mode').checked = true;
+    updateSmartModeUI();
   }
   
   // Load manual ChartSpec or use sample
@@ -117,6 +128,7 @@ function saveSettings() {
   localStorage.setItem('chartspec_provider', state.provider);
   localStorage.setItem('chartspec_apikey', state.apiKey);
   localStorage.setItem('chartspec_localmode', state.localMode.toString());
+  localStorage.setItem('chartspec_smartmode', state.smartMode.toString());
   if (state.manualChartSpec) {
     // Store the formatted JSON for readability
     localStorage.setItem('chartspec_manualspec', JSON.stringify(state.manualChartSpec, null, 2));
@@ -153,6 +165,21 @@ function setupEventListeners() {
   // Local mode toggle
   document.getElementById('local-mode').addEventListener('change', handleLocalModeToggle);
   
+  // Smart mode toggle
+  document.getElementById('smart-mode').addEventListener('change', handleSmartModeToggle);
+  
+  // Vocabulary help
+  document.getElementById('show-vocab-help').addEventListener('click', (e) => {
+    e.preventDefault();
+    showVocabHelp();
+  });
+  document.getElementById('close-vocab-modal').addEventListener('click', hideVocabHelp);
+  document.getElementById('vocab-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'vocab-modal') {
+      hideVocabHelp();
+    }
+  });
+  
   // Local mode ChartSpec
   document.getElementById('apply-chartspec-btn').addEventListener('click', handleApplyChartSpec);
   document.getElementById('chartspec-input').addEventListener('input', (e) => {
@@ -170,7 +197,12 @@ function setupEventListeners() {
   });
   
   // Update token estimation as user types
-  document.getElementById('user-message').addEventListener('input', updateTokenEstimation);
+  document.getElementById('user-message').addEventListener('input', (e) => {
+    updateTokenEstimation();
+    if (state.smartMode) {
+      updateSmartModeSuggestions(e.target.value);
+    }
+  });
   
   document.getElementById('clear-chat-btn').addEventListener('click', handleClearChat);
 }
@@ -284,6 +316,7 @@ function handleDatasetSelection(e) {
   state.currentRows = getDatasetRows(datasetName);
   updateDatasetInfo();
   updateTokenEstimation();
+  updateSmartModeUI();
   
   console.log(`Loaded dataset: ${datasetName} (${state.currentRows.length} rows)`);
 }
@@ -334,8 +367,40 @@ function handleDeleteDataset() {
  */
 function handleLocalModeToggle(e) {
   state.localMode = e.target.checked;
+  
+  // Disable smart mode if local mode is enabled
+  if (state.localMode && state.smartMode) {
+    state.smartMode = false;
+    document.getElementById('smart-mode').checked = false;
+    updateSmartModeUI();
+  }
+  
   saveSettings();
   updateLocalModeUI();
+}
+
+/**
+ * Handle smart mode toggle
+ */
+function handleSmartModeToggle(e) {
+  state.smartMode = e.target.checked;
+  
+  // Disable local mode if smart mode is enabled
+  if (state.smartMode && state.localMode) {
+    state.localMode = false;
+    document.getElementById('local-mode').checked = false;
+    updateLocalModeUI();
+  }
+  
+  saveSettings();
+  updateSmartModeUI();
+  
+  // Check AVA availability
+  if (state.smartMode && !isAvaAvailable()) {
+    addChatMessage('assistant', '⚠️ AVA library not fully loaded. Chart recommendations will use heuristics. Refresh page if needed.');
+  } else if (state.smartMode) {
+    addChatMessage('assistant', '✅ Smart Mode activated! Use natural language commands. Type and see suggestions, or click "View Commands" for help.');
+  }
 }
 
 /**
@@ -351,6 +416,20 @@ function updateLocalModeUI() {
   } else {
     llmConfig.style.display = 'block';
     localModeConfig.style.display = 'none';
+  }
+}
+
+/**
+ * Update UI based on smart mode state
+ */
+function updateSmartModeUI() {
+  const smartModeHints = document.getElementById('smart-mode-hints');
+  
+  if (state.smartMode && state.selectedDataset) {
+    smartModeHints.style.display = 'block';
+    updateSmartModeSuggestions('');
+  } else {
+    smartModeHints.style.display = 'none';
   }
 }
 
@@ -461,6 +540,12 @@ async function handleSendMessage() {
   // In local mode, direct users to use the Apply ChartSpec button
   if (state.localMode) {
     alert('In Local Mode, please edit the ChartSpec JSON and click "Apply ChartSpec" button instead of sending messages.');
+    return;
+  }
+  
+  // Handle Smart Mode (API-less with language parser + AVA)
+  if (state.smartMode) {
+    handleSmartModeMessage(userMessage);
     return;
   }
   
@@ -624,6 +709,120 @@ function handleClearChat() {
   document.getElementById('visualization').innerHTML = '<p class="placeholder">No visualization yet</p>';
   updateTokenEstimation();
 }
+
+/**
+ * Handle Smart Mode message processing
+ */
+function handleSmartModeMessage(userMessage) {
+  // Clear input
+  document.getElementById('user-message').value = '';
+  
+  // Add user message to chat
+  addChatMessage('user', userMessage);
+  
+  const dataset = state.datasets.find(d => d.name === state.selectedDataset);
+  const columns = dataset.columns;
+  
+  // Parse command
+  let parsed = parseCommand(userMessage, columns);
+  
+  // Enhance with AVA if available
+  parsed = enhanceWithAva(parsed, state.currentRows);
+  
+  // Build response message
+  let responseText = `📊 Parsed command (confidence: ${parsed.confidence}%)\n\n`;
+  
+  if (parsed.avaReasoning) {
+    responseText += `💡 AVA Insight: ${parsed.avaReasoning}\n\n`;
+  }
+  
+  // Convert to ChartSpec
+  const spec = commandToSpec(parsed, columns);
+  
+  // Add AVA badge if used
+  if (parsed.avaReasoning) {
+    spec.description = (spec.description || '') + ' [AVA-Recommended]';
+  }
+  
+  // Store spec
+  state.currentSpec = spec;
+  
+  // Show spec in chat
+  addChatMessage('assistant', responseText + 'Generated ChartSpec:\n' + JSON.stringify(spec, null, 2));
+  
+  // Apply spec to data
+  const transformedRows = applySpecToRows(state.currentRows, spec);
+  
+  console.log(`Smart Mode: Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
+  
+  // Render chart
+  const vizContainer = document.getElementById('visualization');
+  const renderer = rendererFactory.getBestRenderer(spec.chartType);
+  renderer.renderChart(vizContainer, transformedRows, spec);
+}
+
+/**
+ * Update Smart Mode suggestions based on user input
+ */
+function updateSmartModeSuggestions(input) {
+  if (!state.selectedDataset) return;
+  
+  const dataset = state.datasets.find(d => d.name === state.selectedDataset);
+  const suggestions = getSuggestions(input, dataset.columns);
+  
+  const suggestionsContainer = document.getElementById('command-suggestions');
+  suggestionsContainer.innerHTML = '';
+  
+  suggestions.forEach(suggestion => {
+    const chip = document.createElement('span');
+    chip.className = 'suggestion-chip';
+    chip.textContent = suggestion;
+    chip.addEventListener('click', () => {
+      document.getElementById('user-message').value = suggestion;
+      document.getElementById('user-message').focus();
+    });
+    suggestionsContainer.appendChild(chip);
+  });
+}
+
+/**
+ * Show vocabulary help modal
+ */
+function showVocabHelp() {
+  const help = getCommandHelp();
+  const content = document.getElementById('vocab-help-content');
+  
+  let html = '';
+  
+  help.sections.forEach(section => {
+    html += `<div class="vocab-section">`;
+    html += `<h3>${section.title}</h3>`;
+    html += `<ul>`;
+    
+    section.commands.forEach(cmd => {
+      const parts = cmd.split(' - ');
+      if (parts.length === 2) {
+        html += `<li><code>${parts[0]}</code> - ${parts[1]}</li>`;
+      } else {
+        html += `<li>${cmd}</li>`;
+      }
+    });
+    
+    html += `</ul>`;
+    html += `</div>`;
+  });
+  
+  content.innerHTML = html;
+  document.getElementById('vocab-modal').style.display = 'flex';
+}
+
+/**
+ * Hide vocabulary help modal
+ */
+function hideVocabHelp() {
+  document.getElementById('vocab-modal').style.display = 'none';
+}
+
 
 /**
  * Update token estimation display
