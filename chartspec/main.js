@@ -98,7 +98,7 @@ function loadSettings() {
     document.getElementById('local-mode').checked = true;
     updateLocalModeUI();
   } else {
-    // Ensure local mode is off by default
+    // No saved preference - sync UI with default state (false)
     document.getElementById('local-mode').checked = state.localMode;
     updateLocalModeUI();
   }
