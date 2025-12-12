@@ -12,8 +12,8 @@ import { BaseRenderer } from '../rendererFactory.js';
 export class D3Renderer extends BaseRenderer {
   constructor() {
     super();
-    // Start with basic chart types - expand later
-    this.supportedTypes = ['bar', 'line', 'scatter', 'table'];
+    // Expand supported chart types
+    this.supportedTypes = ['bar', 'line', 'scatter', 'pie', 'table'];
   }
 
   getName() {
@@ -103,6 +103,11 @@ export class D3Renderer extends BaseRenderer {
         break;
       case 'scatter':
         this.renderScatterChart(svg, rows, spec, width, height);
+        break;
+      case 'pie':
+        // Pie chart doesn't use the standard svg, render differently
+        container.innerHTML = '';
+        this.renderPieChart(container, rows, spec, facetValue);
         break;
       default:
         this.renderNotImplementedMessage(container, spec.chartType);
@@ -354,9 +359,140 @@ export class D3Renderer extends BaseRenderer {
       <div class="renderer-message info">
         <strong>ℹ️ Chart Type Not Yet Implemented</strong>
         <p>The D3 renderer does not yet support chart type: <code>${chartType}</code></p>
-        <p>Currently supported: bar, line, scatter, table</p>
+        <p>Currently supported: bar, line, scatter, pie, table</p>
         <p>Full D3 implementation coming in future releases.</p>
       </div>
     `;
+  }
+
+  /**
+   * Render pie chart with D3
+   */
+  renderPieChart(container, rows, spec, facetValue) {
+    if (rows.length === 0) return;
+    
+    const width = container.offsetWidth || 600;
+    const height = 400;
+    const radius = Math.min(width, height) / 2 - 40;
+    
+    // Create SVG
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', width)
+      .attr('height', height)
+      .append('g')
+      .attr('transform', `translate(${width / 2},${height / 2})`);
+    
+    // Add title
+    if (spec.title || facetValue) {
+      const titleText = facetValue ? `${spec.title || ''} - ${facetValue}` : spec.title || '';
+      svg.append('text')
+        .attr('x', 0)
+        .attr('y', -radius - 20)
+        .attr('text-anchor', 'middle')
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .text(titleText);
+    }
+    
+    // Prepare data
+    const valueColumn = spec.y || 'value';
+    const labelColumn = spec.x || 'label';
+    
+    const pieData = rows.map(r => ({
+      label: r[labelColumn],
+      value: parseFloat(r[valueColumn]) || 0
+    }));
+    
+    // Create pie layout
+    const pie = d3.pie()
+      .value(d => d.value)
+      .sort(null);
+    
+    const arc = d3.arc()
+      .innerRadius(0)
+      .outerRadius(radius);
+    
+    // Color scale
+    const color = d3.scaleOrdinal()
+      .domain(pieData.map(d => d.label))
+      .range(d3.schemeCategory10);
+    
+    // Add pie slices
+    const g = svg.selectAll('.arc')
+      .data(pie(pieData))
+      .enter()
+      .append('g')
+      .attr('class', 'arc');
+    
+    g.append('path')
+      .attr('d', arc)
+      .attr('fill', d => color(d.data.label))
+      .attr('stroke', 'white')
+      .attr('stroke-width', 2);
+    
+    // Add labels
+    g.append('text')
+      .attr('transform', d => `translate(${arc.centroid(d)})`)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('fill', 'white')
+      .text(d => {
+        const percent = ((d.data.value / d3.sum(pieData, p => p.value)) * 100).toFixed(1);
+        return `${d.data.label}: ${percent}%`;
+      });
+  }
+
+  /**
+   * Render table
+   */
+  renderTable(container, rows, spec, facetValue) {
+    if (rows.length === 0) {
+      container.innerHTML = '<p class="no-data">No data to display</p>';
+      return;
+    }
+    
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+    
+    // Add title if present
+    if (spec.title || facetValue) {
+      const title = document.createElement('h3');
+      title.textContent = facetValue ? `${spec.title || ''} - ${facetValue}` : spec.title || '';
+      tableContainer.appendChild(title);
+    }
+    
+    const table = document.createElement('table');
+    table.className = 'data-table';
+    
+    // Create header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const columns = Object.keys(rows[0]);
+    
+    columns.forEach(col => {
+      const th = document.createElement('th');
+      th.textContent = col;
+      headerRow.appendChild(th);
+    });
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create body
+    const tbody = document.createElement('tbody');
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      columns.forEach(col => {
+        const td = document.createElement('td');
+        td.textContent = row[col];
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
+    container.appendChild(tableContainer);
   }
 }
