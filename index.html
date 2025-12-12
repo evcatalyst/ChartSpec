@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="./styles.css">
   <!-- Plotly.js from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
+  <!-- AVA from CDN for intelligent chart recommendations -->
+  <script src="https://unpkg.com/@antv/ava@latest/dist/index.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -75,6 +77,17 @@
             </label>
             <p class="note">
               Skip LLM and use manual ChartSpec JSON. API key not required.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="smart-mode">
+              <strong>Smart Mode (AVA-Powered)</strong>
+            </label>
+            <p class="note">
+              Use AVA for intelligent chart selection and local language parser. 
+              No API key required. <a href="#" id="show-vocab-help" class="help-link">View Commands</a>
             </p>
           </div>
 
@@ -162,6 +175,10 @@
               class="form-control" 
               placeholder="Ask for a chart... (e.g., 'Show revenue by region as a bar chart')"
               rows="3"></textarea>
+            <div id="smart-mode-hints" class="smart-mode-hints" style="display: none;">
+              <p class="hint-label">💡 Smart Mode Active - Try:</p>
+              <div id="command-suggestions" class="command-suggestions"></div>
+            </div>
             <div class="button-group">
               <button id="send-message-btn" class="btn btn-primary">Send</button>
               <button id="clear-chat-btn" class="btn btn-secondary">Clear Chat</button>
@@ -183,6 +200,19 @@
     <footer class="app-footer">
       <p>ChartSpec - Browser-based data visualization with AI assistance</p>
     </footer>
+  </div>
+
+  <!-- Vocabulary Help Modal -->
+  <div id="vocab-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Smart Mode Command Vocabulary</h2>
+        <button id="close-vocab-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="vocab-help-content">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
   </div>
 
   <!-- Load main application as ES module -->
