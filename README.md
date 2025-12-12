@@ -2,6 +2,8 @@
 
 AI-powered data visualization assistant for browser-based chart creation. ChartSpec uses LLMs (OpenAI/Grok) to generate chart specifications from natural language, then renders them with multiple visualization libraries.
 
+**🚀 [Try ChartSpec Live](https://evcatalyst.github.io/ChartSpec/)** - No installation required!
+
 ## Features
 
 - 🎨 **Natural Language Charting**: Describe your desired visualization in plain English
@@ -19,11 +21,17 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 
 ### 1. Open the Application
 
-**Option A: Local File**
+**🌐 Option A: Use the Live Site** (Recommended)
+- Visit **[https://evcatalyst.github.io/ChartSpec/](https://evcatalyst.github.io/ChartSpec/)**
+- No installation or setup required
+- Works on any modern browser
+
+**💻 Option B: Run Locally**
 - Clone or download this repository
 - Open `index.html` in a modern web browser
 
-**Option B: GitHub Pages**
+**🚀 Option C: Deploy Your Own**
+- Fork this repository
 - Deploy to GitHub Pages (see deployment section below)
 - Access via your GitHub Pages URL
 
