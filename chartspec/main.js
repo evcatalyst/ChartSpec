@@ -25,7 +25,7 @@ let state = {
   provider: 'openai',
   apiKey: '',
   localMode: false,
-  smartMode: false,
+  smartMode: true, // Default to Smart Mode for immediate chat-driven ChartSpec generation
   manualChartSpec: null,
   currentRenderer: 'plotly' // Default renderer
 };
@@ -50,6 +50,9 @@ export async function init() {
   
   // Wire up event listeners
   setupEventListeners();
+  
+  // Show welcome message for first-time users
+  showWelcomeMessage();
   
   console.log('ChartSpec application initialized');
 }
@@ -94,12 +97,25 @@ function loadSettings() {
     state.localMode = true;
     document.getElementById('local-mode').checked = true;
     updateLocalModeUI();
+  } else {
+    // Ensure local mode is off by default
+    document.getElementById('local-mode').checked = state.localMode;
+    updateLocalModeUI();
   }
   
   // Load smart mode state
   if (savedSmartMode === 'true') {
     state.smartMode = true;
     document.getElementById('smart-mode').checked = true;
+    updateSmartModeUI();
+  } else if (savedSmartMode === 'false') {
+    // User explicitly disabled Smart Mode
+    state.smartMode = false;
+    document.getElementById('smart-mode').checked = false;
+    updateSmartModeUI();
+  } else {
+    // First time user - use default (Smart Mode enabled)
+    document.getElementById('smart-mode').checked = state.smartMode;
     updateSmartModeUI();
   }
   
@@ -821,6 +837,44 @@ function showVocabHelp() {
  */
 function hideVocabHelp() {
   document.getElementById('vocab-modal').style.display = 'none';
+}
+
+/**
+ * Show welcome message for first-time users
+ */
+function showWelcomeMessage() {
+  // Check if this is a first-time user (no saved chat history)
+  const hasSeenWelcome = localStorage.getItem('chartspec_welcome_shown');
+  
+  if (!hasSeenWelcome) {
+    // Mark as shown
+    localStorage.setItem('chartspec_welcome_shown', 'true');
+    
+    // Show appropriate welcome message based on mode
+    if (state.smartMode) {
+      addChatMessage('assistant', 
+        '👋 Welcome to ChartSpec!\n\n' +
+        '🧠 Smart Mode is active - you can create charts using natural language without an API key.\n\n' +
+        '💡 Try commands like:\n' +
+        '• "show bar chart of Revenue by Region"\n' +
+        '• "display line chart of Temperature"\n' +
+        '• "show pie chart grouped by Product"\n\n' +
+        'Click "View Commands" in the LLM Settings panel for more examples, or select a dataset to get started!'
+      );
+    } else if (state.localMode) {
+      addChatMessage('assistant', 
+        '👋 Welcome to ChartSpec!\n\n' +
+        '📝 Local Mode is active - you can manually edit ChartSpec JSON.\n\n' +
+        'Edit the ChartSpec in the panel on the left, then click "Apply ChartSpec" to visualize your data.'
+      );
+    } else {
+      addChatMessage('assistant', 
+        '👋 Welcome to ChartSpec!\n\n' +
+        '🤖 LLM Mode is active - enter your API key in the settings to use AI-powered chart generation.\n\n' +
+        'Or switch to Smart Mode for API-less natural language charting!'
+      );
+    }
+  }
 }
 
 

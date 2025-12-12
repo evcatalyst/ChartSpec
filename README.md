@@ -1,18 +1,18 @@
 # ChartSpec
 
-AI-powered data visualization assistant for browser-based chart creation. ChartSpec uses LLMs (OpenAI/Grok) to generate chart specifications from natural language, then renders them with multiple visualization libraries.
+AI-powered data visualization assistant for browser-based chart creation. ChartSpec uses natural language to generate chart specifications and renders them with multiple visualization libraries. **No API key required to get started** - Smart Mode is enabled by default!
 
-**🚀 [Try ChartSpec Live](https://evcatalyst.github.io/ChartSpec/)** - No installation required!
+**🚀 [Try ChartSpec Live](https://evcatalyst.github.io/ChartSpec/)** - Start creating charts immediately!
 
 ## Features
 
 - 🎨 **Natural Language Charting**: Describe your desired visualization in plain English
-- 🧠 **Smart Mode (NEW)**: API-less demo with AVA-powered chart selection and local language parser
+- 🧠 **Smart Mode (Default)**: API-less charting with AVA-powered chart selection - **no setup required!**
+- 🔌 **Optional LLM Integration**: Advanced AI features with OpenAI and Grok (X.AI) support
 - 📊 **Multiple Chart Types**: Bar, line, scatter, pie, histogram, box plots, heatmaps, and tables
 - 🔄 **Data Transformations**: Filters, grouping, aggregations, sorting, and limiting
 - 📱 **Mobile-First Design**: Responsive layout that works on all devices
 - 💾 **Browser-Based**: No server required - runs entirely in your browser
-- 🔌 **Multiple LLM Providers**: Support for OpenAI and Grok (X.AI)
 - 📁 **Dataset Management**: Upload and manage CSV datasets locally
 - 🎯 **Faceted Charts**: Create small multiples for data comparison
 - 🔧 **Renderer Abstraction**: Support for multiple visualization libraries (Plotly, D3)
@@ -24,7 +24,7 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 
 **🌐 Option A: Use the Live Site** (Recommended)
 - Visit **[https://evcatalyst.github.io/ChartSpec/](https://evcatalyst.github.io/ChartSpec/)**
-- No installation or setup required
+- **Start creating charts immediately - no setup required!**
 - Works on any modern browser
 
 **💻 Option B: Run Locally**
@@ -40,12 +40,36 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 
 ChartSpec offers three modes of operation:
 
-#### 🤖 LLM Mode (Default)
+#### 🧠 Smart Mode (Default - API-less)
+**Enabled by default!** Intelligent chart creation without API keys using AVA and local language parsing:
+1. Simply select a dataset and start typing commands in the chat
+2. Use discrete vocabulary commands (click "View Commands" for help)
+3. Get instant chart recommendations powered by AVA (AntV)
+4. See real-time command suggestions as you type
+
+**Benefits:**
+- ✅ No API key required - completely free
+- ✅ Instant responses - no network latency
+- ✅ Privacy-first - all processing in-browser
+- ✅ Intelligent recommendations via AVA
+- ✅ Perfect for demos and learning
+- ✅ **Ready to use immediately - no setup required!**
+
+**Example Commands:**
+- `show bar chart of Revenue by Region`
+- `display line chart of Temperature`
+- `show pie chart grouped by Product`
+- `show top 10 by Revenue descending`
+
+📖 **Full documentation**: See [docs/SMART_MODE.md](docs/SMART_MODE.md) for complete vocabulary and usage guide.
+
+#### 🤖 LLM Mode
 Full AI-powered natural language processing using OpenAI or Grok:
-1. Select your LLM provider (OpenAI or Grok)
-2. Enter your API key in the settings panel
-3. Optionally select a specific model (or use the provider default)
-4. **Important**: API keys are stored in browser localStorage only - never commit them to repositories
+1. Uncheck "Smart Mode (AVA-Powered)" in LLM Settings
+2. Select your LLM provider (OpenAI or Grok)
+3. Enter your API key in the settings panel
+4. Optionally select a specific model (or use the provider default)
+5. **Important**: API keys are stored in browser localStorage only - never commit them to repositories
 
 **Getting API Keys:**
 - **OpenAI**: https://platform.openai.com/api-keys
@@ -62,28 +86,6 @@ Full AI-powered natural language processing using OpenAI or Grok:
 - See breakdown of system prompt, your message, and response tokens
 - Get warnings when approaching token limits
 - Helps optimize costs and stay within model limits
-
-#### 🧠 Smart Mode (NEW - API-less)
-Intelligent chart creation without API keys using AVA and local language parsing:
-1. Check the "Smart Mode (AVA-Powered)" checkbox in LLM Settings
-2. Use discrete vocabulary commands (click "View Commands" for help)
-3. Get instant chart recommendations powered by AVA (AntV)
-4. See real-time command suggestions as you type
-
-**Benefits:**
-- ✅ No API key required - completely free
-- ✅ Instant responses - no network latency
-- ✅ Privacy-first - all processing in-browser
-- ✅ Intelligent recommendations via AVA
-- ✅ Perfect for demos and learning
-
-**Example Commands:**
-- `show bar chart of Revenue by Region`
-- `display line chart of Temperature`
-- `show pie chart grouped by Product`
-- `show top 10 by Revenue descending`
-
-📖 **Full documentation**: See [docs/SMART_MODE.md](docs/SMART_MODE.md) for complete vocabulary and usage guide.
 
 #### 📝 Local Mode
 Manual ChartSpec JSON editing for advanced users:
@@ -115,10 +117,25 @@ The app comes with two demo datasets that are automatically registered on first 
 
 ### 4. Create Visualizations
 
-1. Select a dataset from the dropdown
-2. Type your request in the chat box (e.g., "Show revenue by region as a bar chart")
+**With Smart Mode (Default - No Setup Required):**
+1. Select a dataset from the dropdown (e.g., "Sample Sales")
+2. Type your request in the chat box using simple commands
 3. Press Send or Enter
-4. The AI will generate a chart specification and render it
+4. ChartSpec will instantly generate and render your chart!
+
+**Example Commands:**
+- "show bar chart of Revenue by Region"
+- "display line chart of Temperature"
+- "show pie chart grouped by Product"
+- "show top 10 by Revenue descending"
+- "show scatter plot of Temperature vs Humidity"
+
+**Tip:** Click "View Commands" in the LLM Settings panel for a complete list of supported commands and examples.
+
+**With LLM Mode (Requires API Key):**
+1. Uncheck "Smart Mode" and enter your API key in settings
+2. Use natural, conversational language
+3. The LLM will understand complex requests
 
 **Example Requests:**
 - "Create a bar chart of revenue by region"
