@@ -609,10 +609,6 @@ async function handleSendMessage() {
     alert(`Error: ${error.message}`);
   }
 }
-    updateChatMessage(loadingId, `Error: ${error.message}`);
-    alert(`Error: ${error.message}`);
-  }
-}
 
 /**
  * Handle auto-refine
