@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChartSpec Workbench - Data Visualization Workspace</title>
+  
+  <!-- CSS Tokens and Styles -->
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/app.css">
+  <link rel="stylesheet" href="./styles/components.css">
+  
+  <!-- Gridstack CSS (from CDN with fallback) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css" 
+        onerror="console.warn('Gridstack CSS failed to load from CDN')">
+  
+  <!-- External Libraries -->
+  <!-- Plotly.js for chart rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
+  
+  <!-- D3.js for fallback rendering -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  
+  <!-- AVA for intelligent chart recommendations -->
+  <script src="https://unpkg.com/@antv/ava@latest/dist/index.min.js"></script>
+  
+  <!-- Gridstack.js for grid layout -->
+  <script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
+  
+  <!-- Split.js for resizable panels (optional, inline fallback) -->
+  <script>
+    // Minimal Split.js polyfill for resizable drawer
+    // Real Split.js would be loaded from CDN or vendor
+    window.Split = window.Split || function() {
+      console.warn('Split.js not loaded, using basic resize');
+      return { setSizes: () => {}, destroy: () => {} };
+    };
+  </script>
+</head>
+<body>
+  <!-- App Shell - Main Layout Container -->
+  <cs-app-shell></cs-app-shell>
+  
+  <!-- Load application as ES module -->
+  <script type="module" src="./workbench/main.js"></script>
+</body>
+</html>
