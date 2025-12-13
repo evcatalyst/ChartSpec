@@ -413,6 +413,8 @@ ChartSpec/
 ├── index.html              # Main HTML file
 ├── styles.css              # Responsive styles
 ├── ROADMAP.md             # Development roadmap
+├── SYNC_POLICY.md         # File sync requirements (IMPORTANT!)
+├── check-sync.sh          # Sync verification script
 ├── chartspec/              # Application modules
 │   ├── chartSpec.js        # Schema definition
 │   ├── dataEngine.js       # Data transformations
@@ -425,10 +427,13 @@ ChartSpec/
 │   ├── tokenCounter.js     # Token estimation
 │   ├── llmRouter.js        # LLM integration
 │   └── main.js             # Application orchestration
+├── docs/                   # GitHub Pages deployment (must stay in sync!)
 └── datasets/               # Demo datasets
     ├── sample-sales.csv
     └── sample-weather.csv
 ```
+
+**Important**: Key files exist in both root and `/docs` directories and must be kept in sync. The `/docs` directory is deployed to GitHub Pages. See [SYNC_POLICY.md](SYNC_POLICY.md) for details and run `./check-sync.sh` before committing.
 
 ### Extending ChartSpec
 
@@ -456,7 +461,8 @@ Contributions welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Submit a pull request
+4. **Important**: Run `./check-sync.sh` to ensure root and `/docs` files are in sync (see [SYNC_POLICY.md](SYNC_POLICY.md))
+5. Submit a pull request
 
 ## Support
 
