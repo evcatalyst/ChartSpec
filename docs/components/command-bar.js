@@ -84,6 +84,30 @@ class CommandBar extends HTMLElement {
   }
   
   setupEventListeners() {
+    // Attach DOM event listeners
+    this.attachDOMListeners();
+    
+    // Store listeners (only need to be attached once)
+    store.on('datasets:loaded', (datasets) => {
+      this.state.datasets = datasets;
+      this.render();
+      this.attachDOMListeners();
+    });
+    
+    store.on('dataset:selected', (datasetName) => {
+      this.state.selectedDataset = datasetName;
+      this.render();
+      this.attachDOMListeners();
+    });
+    
+    store.on('layout:preset:changed', (preset) => {
+      this.state.layoutPreset = preset;
+      this.render();
+      this.attachDOMListeners();
+    });
+  }
+  
+  attachDOMListeners() {
     // Dataset selector
     this.querySelector('#dataset-pill')?.addEventListener('click', () => {
       store.emit('command:select-dataset');
@@ -105,22 +129,6 @@ class CommandBar extends HTMLElement {
     // Presentation mode
     this.querySelector('#toggle-presentation')?.addEventListener('click', () => {
       store.togglePresentationMode();
-    });
-    
-    // Store listeners
-    store.on('datasets:loaded', (datasets) => {
-      this.state.datasets = datasets;
-      this.render();
-    });
-    
-    store.on('dataset:selected', (datasetName) => {
-      this.state.selectedDataset = datasetName;
-      this.render();
-    });
-    
-    store.on('layout:preset:changed', (preset) => {
-      this.state.layoutPreset = preset;
-      this.render();
     });
   }
   
