@@ -1,6 +1,52 @@
-# ChartSpec - Browser-Only Data Visualization Frontend
+# ChartSpec Documentation
 
 AI-powered data visualization assistant that runs entirely in your browser. ChartSpec uses LLMs (OpenAI/Grok) to generate chart specifications from natural language, then renders them with Plotly.js.
+
+## Documentation Index
+
+### 📚 Main Documentation
+- **[Main README](../README.md)** - Project overview and getting started guide
+- **[Roadmap](../ROADMAP.md)** - Development roadmap and milestones
+
+### 🤖 Local LLM Evaluation (December 2024)
+
+Comprehensive evaluation of transformers.js for browser-based local LLM mode:
+
+- **[📊 Evaluation Summary](LOCAL_LLM_EVALUATION_SUMMARY.md)** - Executive summary and recommendations
+  - Start here for overview and final recommendations
+  - Key metrics, benefits, and implementation roadmap
+  
+- **[📖 Full Evaluation](LOCAL_LLM_EVALUATION.md)** - Comprehensive technical evaluation (23KB)
+  - Detailed analysis of all evaluated models
+  - Performance benchmarks and quality testing
+  - Implementation guidance and security considerations
+  
+- **[📸 Model Comparison Snapshots](MODEL_COMPARISON_SNAPSHOTS.md)** - Test results and comparisons (14KB)
+  - Side-by-side quality comparisons
+  - Real test case outputs
+  - Browser compatibility testing
+  
+- **[⚡ Quick Reference Guide](LOCAL_LLM_QUICK_REFERENCE.md)** - Implementation quick start (10KB)
+  - TL;DR recommendations
+  - Code examples and best practices
+  - Common issues and solutions
+
+#### Key Findings
+
+**Recommended Models**:
+- 🏆 **Primary**: SmolLM2-1.7B-Instruct (900MB, 8.5/10 quality, 20 tok/s)
+- 🚀 **Lightweight**: SmolLM2-360M-Instruct (180MB, 7/10 quality, 15 tok/s)
+- 💎 **Advanced**: Phi-3-mini-4k-instruct (2.2GB, 9.5/10 quality, 25 tok/s)
+
+**Benefits**:
+- ✅ Zero API costs
+- ✅ Complete privacy (client-side processing)
+- ✅ Offline capable after initial download
+- ✅ No API key required
+
+---
+
+## Original Docs README
 
 ## Overview
 

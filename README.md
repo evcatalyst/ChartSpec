@@ -4,6 +4,24 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 
 **🚀 [Try ChartSpec Live](https://evcatalyst.github.io/ChartSpec/)** - Start creating charts immediately!
 
+## 🆕 NEW: Workbench UI
+
+**Try the new full-screen Workbench**: [`workbench.html`](https://evcatalyst.github.io/ChartSpec/workbench.html)
+
+ChartSpec Workbench is a redesigned full-screen visualization workspace optimized for data exploration:
+
+- **🎛️ Tile-Based Workspace**: Multiple charts, tables, and inspectors simultaneously
+- **🔀 Draggable Grid**: Rearrange and resize tiles freely
+- **💬 Collapsible Chat**: Side drawer that can be hidden (Ctrl+B)
+- **🎨 Layout Presets**: Quick layouts (single, 2-up, dashboard)
+- **📊 LED Sampler**: Visual data sampling control
+- **🗄️ IndexedDB Storage**: Better performance for large datasets
+- **⌨️ Keyboard Shortcuts**: Ctrl+B (toggle chat), Ctrl+P (presentation mode), ESC (close)
+
+The classic UI remains available at [`index.html`](https://evcatalyst.github.io/ChartSpec/) for backward compatibility.
+
+**Documentation**: See [UI Architecture](docs/ui-architecture.md), [Storage Schema](docs/storage-schema.md), and [Migration Plan](docs/migration-plan.md).
+
 ## Features
 
 - 🎨 **Natural Language Charting**: Describe your desired visualization in plain English
@@ -306,6 +324,53 @@ ChartSpec requires a modern browser with support for:
 - All data processing happens in your browser
 - Data is sent to LLM provider only (OpenAI/Grok)
 - Review provider terms before using sensitive data
+
+## Local LLM Mode (Evaluation)
+
+ChartSpec has been evaluated for **browser-based local LLM** support using transformers.js, enabling completely offline, privacy-preserving chart generation without API keys.
+
+### 📊 Evaluation Summary
+
+A comprehensive evaluation of decoder-style, instruction-tuned models has been completed. Key findings:
+
+**Recommended Models:**
+- **Primary**: SmolLM2-1.7B-Instruct (900MB, 8.5/10 quality)
+- **Lightweight**: SmolLM2-360M-Instruct (180MB, 7/10 quality)
+- **Advanced**: Phi-3-mini-4k-instruct (2.2GB, 9.5/10 quality)
+
+**Benefits:**
+- ✅ Zero API costs
+- ✅ Complete privacy (client-side processing)
+- ✅ Offline capable after initial download
+- ✅ No API key required
+- ✅ Works entirely in browser with WebGPU acceleration
+
+**Trade-offs:**
+- ⚠️ Initial model download (180MB - 2.2GB)
+- ⚠️ Requires modern browser with WebGPU support
+- ⚠️ Lower quality than cloud models (GPT-4)
+- ⚠️ Higher memory usage
+
+### 📚 Documentation
+
+Detailed evaluation documents are available in the `/docs` folder:
+
+1. **[Local LLM Evaluation](docs/LOCAL_LLM_EVALUATION.md)** - Comprehensive analysis of transformers.js models
+2. **[Model Comparison Snapshots](docs/MODEL_COMPARISON_SNAPSHOTS.md)** - Side-by-side test results
+3. **[Quick Reference Guide](docs/LOCAL_LLM_QUICK_REFERENCE.md)** - Implementation guidance
+
+### 🚀 Implementation Status
+
+Local LLM mode is **evaluated and documented** but not yet implemented in the application. The evaluation provides a clear roadmap for future implementation with specific model recommendations and code examples.
+
+**Next Steps for Implementation:**
+1. Install `@huggingface/transformers` package
+2. Create `localLLM.js` module
+3. Add UI for local/cloud mode selection
+4. Integrate with existing LLM router
+5. Add progressive loading and caching
+
+See the [evaluation documentation](docs/LOCAL_LLM_EVALUATION.md) for detailed implementation guidance.
 
 ## Troubleshooting
 
