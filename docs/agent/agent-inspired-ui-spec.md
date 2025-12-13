@@ -714,7 +714,7 @@ worker.onmessage = (e) => {
 
 ## Inspiration & References
 
-- [GitHub Copilot Agent UI](https://github.com) - Technical, state-focused
+- GitHub Copilot Agent UI - Technical, state-focused interface design
 - [Observable](https://observablehq.com) - Data exploration
 - [Jupyter Lab](https://jupyterlab.readthedocs.io/) - Multi-pane workspace
 - [Tableau](https://www.tableau.com) - Data source inventory
