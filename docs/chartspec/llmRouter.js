@@ -2,12 +2,6 @@
 
 import { ChartSpec } from './chartSpec.js';
 
-// Default models for each provider
-export const DEFAULT_MODELS = {
-  openai: 'gpt-4o-mini',
-  grok: 'grok-3'  // Updated from deprecated grok-beta
-};
-
 /**
  * Build system prompt with ChartSpec schema
  * @param {Array} columns - Available columns in the dataset
@@ -90,18 +84,10 @@ function parseJSONResponse(text) {
  * @param {string} provider - 'openai' or 'grok'
  * @param {string} apiKey - API key
  * @param {Array} messages - Array of message objects
- * @param {string} customModel - Optional custom model override
  * @returns {Promise<string>} Response text
  */
-async function callLLM(provider, apiKey, messages, customModel = null) {
+async function callLLM(provider, apiKey, messages) {
   let url, headers, body;
-  
-  // Validate provider before accessing DEFAULT_MODELS
-  if (!Object.prototype.hasOwnProperty.call(DEFAULT_MODELS, provider)) {
-    throw new Error(`Unsupported provider: ${provider}`);
-  }
-  // Use custom model if provided, otherwise use default for provider
-  const model = customModel || DEFAULT_MODELS[provider];
   
   if (provider === 'openai') {
     url = 'https://api.openai.com/v1/chat/completions';
@@ -110,7 +96,7 @@ async function callLLM(provider, apiKey, messages, customModel = null) {
       'Authorization': `Bearer ${apiKey}`
     };
     body = {
-      model,
+      model: 'gpt-4o-mini',
       messages,
       temperature: 0.7,
       max_tokens: 2000
@@ -122,7 +108,7 @@ async function callLLM(provider, apiKey, messages, customModel = null) {
       'Authorization': `Bearer ${apiKey}`
     };
     body = {
-      model,
+      model: 'grok-beta',
       messages,
       temperature: 0.7,
       max_tokens: 2000
@@ -139,16 +125,7 @@ async function callLLM(provider, apiKey, messages, customModel = null) {
   
   if (!response.ok) {
     const errorText = await response.text();
-    let errorMessage = `LLM API error: ${response.status} - ${errorText}`;
-    
-    // Add helpful hint for 404/deprecation errors
-    if (response.status === 404 || errorText.includes('deprecated') || errorText.includes('not found')) {
-      if (provider === 'grok' && (model === 'grok-beta' || model?.endsWith('-beta'))) {
-        errorMessage += '\n\nHint: The model "grok-beta" has been deprecated. Try using "grok-3" instead.';
-      }
-    }
-    
-    throw new Error(errorMessage);
+    throw new Error(`LLM API error: ${response.status} - ${errorText}`);
   }
   
   const data = await response.json();
@@ -168,10 +145,9 @@ async function callLLM(provider, apiKey, messages, customModel = null) {
  * @param {Array} columns - Available columns
  * @param {Array} sampleRows - Sample rows
  * @param {Object} currentSpec - Current ChartSpec (optional)
- * @param {string} customModel - Optional custom model override
  * @returns {Promise<Object>} New ChartSpec object
  */
-export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns, sampleRows, currentSpec = null, customModel = null) {
+export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns, sampleRows, currentSpec = null) {
   const systemPrompt = buildSystemPrompt(columns, sampleRows);
   
   const messages = [
@@ -190,7 +166,7 @@ export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns
     content: userMessage
   });
   
-  const responseText = await callLLM(provider, apiKey, messages, customModel);
+  const responseText = await callLLM(provider, apiKey, messages);
   const spec = parseJSONResponse(responseText);
   
   return spec;
@@ -204,10 +180,9 @@ export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns
  * @param {string} imageDataUrl - Base64 image data URL
  * @param {Array} columns - Available columns
  * @param {Array} sampleRows - Sample rows
- * @param {string} customModel - Optional custom model override
  * @returns {Promise<Object>} Refined ChartSpec object
  */
-export async function refineChartSpec(provider, apiKey, currentSpec, imageDataUrl, columns, sampleRows, customModel = null) {
+export async function refineChartSpec(provider, apiKey, currentSpec, imageDataUrl, columns, sampleRows) {
   const systemPrompt = buildSystemPrompt(columns, sampleRows);
   
   const messages = [
@@ -229,7 +204,7 @@ Return an improved ChartSpec JSON.`
   // Note: Image analysis would require vision-capable models
   // For now, we'll refine based on the spec itself
   
-  const responseText = await callLLM(provider, apiKey, messages, customModel);
+  const responseText = await callLLM(provider, apiKey, messages);
   const spec = parseJSONResponse(responseText);
   
   return spec;
