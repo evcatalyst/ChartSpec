@@ -29,6 +29,8 @@ IMPORTANT:
 4. Choose appropriate chart types (scatter, bar, line, pie, histogram, box, heatmap, table)
 5. Apply filters, groupBy, and aggregations when appropriate
 6. For groupBy, specify columns array and aggregations object with format: { columnName: { func: 'sum|mean|count|min|max' } }
+7. When user asks to modify or update an existing chart, review the previous ChartSpec in the conversation and apply only the requested changes while preserving other settings
+8. For iterative requests (e.g., "change the axis", "update colors"), build upon the previous specification
 
 Example response:
 {
@@ -145,16 +147,31 @@ async function callLLM(provider, apiKey, messages) {
  * @param {Array} columns - Available columns
  * @param {Array} sampleRows - Sample rows
  * @param {Object} currentSpec - Current ChartSpec (optional)
+ * @param {Array} chatHistory - Previous conversation messages (optional)
  * @returns {Promise<Object>} New ChartSpec object
  */
-export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns, sampleRows, currentSpec = null) {
+export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns, sampleRows, currentSpec = null, chatHistory = []) {
   const systemPrompt = buildSystemPrompt(columns, sampleRows);
   
   const messages = [
     { role: 'system', content: systemPrompt }
   ];
   
-  if (currentSpec) {
+  // Include conversation history for context
+  if (chatHistory && chatHistory.length > 0) {
+    chatHistory.forEach(msg => {
+      if (msg.role === 'user') {
+        messages.push({ role: 'user', content: msg.content });
+      } else if (msg.role === 'assistant') {
+        // Convert spec object to JSON string for assistant messages
+        const content = typeof msg.content === 'object' 
+          ? JSON.stringify(msg.content) 
+          : msg.content;
+        messages.push({ role: 'assistant', content });
+      }
+    });
+  } else if (currentSpec) {
+    // Fallback to old behavior if no chat history provided
     messages.push({
       role: 'assistant',
       content: `Current spec: ${JSON.stringify(currentSpec)}`

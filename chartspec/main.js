@@ -576,7 +576,8 @@ async function handleSendMessage() {
       userMessage,
       columns,
       sampleRows,
-      state.currentSpec
+      state.currentSpec,
+      state.chatHistory
     );
     
     // Update chat with spec
