@@ -165,13 +165,13 @@ export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns
       } else if (msg.role === 'assistant') {
         // Convert spec object to JSON string for assistant messages
         let content = msg.content;
-        if (msg.content != null && typeof msg.content === 'object' && !Array.isArray(msg.content)) {
+        if (msg.content !== null && msg.content !== undefined && typeof msg.content === 'object' && !Array.isArray(msg.content)) {
           try {
             content = JSON.stringify(msg.content);
           } catch (e) {
             // Handle circular references or non-serializable values
             console.error(`Failed to stringify assistant message at index ${index}:`, e.message);
-            content = '[Invalid JSON object]';
+            content = `[Serialization Error: ${e.message}]`;
           }
         }
         messages.push({ role: 'assistant', content });

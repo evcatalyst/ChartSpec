@@ -583,9 +583,11 @@ async function handleSendMessage() {
     // Update chat with spec
     updateChatMessage(loadingId, JSON.stringify(spec, null, 2));
     
-    // Store spec and update chat history
-    // Note: We update history here (after successful LLM response) even if rendering fails,
-    // so the user can continue to iterate on the spec
+    /**
+     * Store spec and update chat history
+     * Note: We update history here (after successful LLM response) even if rendering fails,
+     * so the user can continue to iterate on the spec
+     */
     state.currentSpec = spec;
     state.chatHistory.push({ role: 'user', content: userMessage });
     state.chatHistory.push({ role: 'assistant', content: spec });
