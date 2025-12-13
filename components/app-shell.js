@@ -21,9 +21,9 @@ class AppShell extends HTMLElement {
     this.innerHTML = `
       <cs-command-bar></cs-command-bar>
       
-      <div class="workbench-layout">
-        <cs-grid></cs-grid>
-        <div class="splitter" id="drawer-splitter"></div>
+      <div class="workbench-layout" style="display: flex; flex: 1; overflow: hidden;">
+        <cs-grid style="flex: 1;"></cs-grid>
+        <div class="splitter" id="drawer-splitter" style="display: none;"></div>
         <cs-chat-drawer></cs-chat-drawer>
       </div>
     `;
