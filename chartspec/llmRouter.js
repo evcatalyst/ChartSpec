@@ -164,10 +164,13 @@ export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns
         messages.push({ role: 'user', content: msg.content });
       } else if (msg.role === 'assistant') {
         // Convert spec object to JSON string for assistant messages
-        const content = typeof msg.content === 'object' 
+        const content = (msg.content != null && typeof msg.content === 'object' && !Array.isArray(msg.content))
           ? JSON.stringify(msg.content) 
           : msg.content;
         messages.push({ role: 'assistant', content });
+      } else {
+        // Log unexpected message types for debugging
+        console.warn(`Unexpected message role in chat history: ${msg.role}`);
       }
     });
   } else if (currentSpec) {
