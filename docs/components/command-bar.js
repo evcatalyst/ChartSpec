@@ -37,6 +37,9 @@ class CommandBar extends HTMLElement {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
           </svg>
         </button>
+        <button class="btn btn-sm btn-secondary" id="open-demo-gallery" title="Open Demo Gallery">
+          Demo Gallery
+        </button>
       </div>
       
       <div class="command-bar-right">
@@ -111,6 +114,10 @@ class CommandBar extends HTMLElement {
     // Dataset selector
     this.querySelector('#dataset-pill')?.addEventListener('click', () => {
       store.emit('command:select-dataset');
+    });
+    
+    this.querySelector('#open-demo-gallery')?.addEventListener('click', () => {
+      store.emit('command:open-demo-gallery');
     });
     
     // Layout presets

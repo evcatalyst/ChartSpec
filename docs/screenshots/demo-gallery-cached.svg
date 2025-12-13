@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img">
+  <rect width="900" height="520" fill="#0f172a"/>
+  <text x="40" y="80" fill="#a5b4fc" font-family="Arial, sans-serif" font-size="28" font-weight="bold">Demo Gallery - Cached Indicator</text>
+  <text x="40" y="130" fill="#e2e8f0" font-family="Arial, sans-serif" font-size="18">Shows "Using cached data from HH:MM" with refresh control.</text>
+  <text x="40" y="180" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="16">• Cached mode + TTL message</text>
+  <text x="40" y="210" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="16">• Refresh button available</text>
+</svg>
