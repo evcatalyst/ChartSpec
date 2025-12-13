@@ -159,18 +159,25 @@ export async function getUpdatedChartSpec(provider, apiKey, userMessage, columns
   
   // Include conversation history for context
   if (chatHistory && chatHistory.length > 0) {
-    chatHistory.forEach(msg => {
+    chatHistory.forEach((msg, index) => {
       if (msg.role === 'user') {
         messages.push({ role: 'user', content: msg.content });
       } else if (msg.role === 'assistant') {
         // Convert spec object to JSON string for assistant messages
-        const content = (msg.content != null && typeof msg.content === 'object' && !Array.isArray(msg.content))
-          ? JSON.stringify(msg.content) 
-          : msg.content;
+        let content = msg.content;
+        if (msg.content != null && typeof msg.content === 'object' && !Array.isArray(msg.content)) {
+          try {
+            content = JSON.stringify(msg.content);
+          } catch (e) {
+            // Handle circular references or non-serializable values
+            console.error(`Failed to stringify assistant message at index ${index}:`, e.message);
+            content = '[Invalid JSON object]';
+          }
+        }
         messages.push({ role: 'assistant', content });
       } else {
         // Log unexpected message types for debugging
-        console.warn(`Unexpected message role in chat history: ${msg.role}`);
+        console.warn(`Unexpected message role at index ${index}:`, msg.role, 'Full message:', msg);
       }
     });
   } else if (currentSpec) {
