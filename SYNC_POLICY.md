@@ -39,6 +39,8 @@ Run the sync check script before committing:
 ./check-sync.sh
 ```
 
+**Note**: The script is already executable. If you encounter permission issues, run: `chmod +x check-sync.sh`
+
 This script will:
 - ✅ Verify all files and directories are in sync
 - ❌ Report any discrepancies

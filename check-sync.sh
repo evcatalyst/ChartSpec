@@ -21,6 +21,12 @@ for file in "${files_to_check[@]}"; do
         else
             echo "✅ $file is in sync"
         fi
+    elif [ ! -f "$file" ]; then
+        echo "⚠️  WARNING: $file exists in docs/ but not in root"
+        errors=$((errors + 1))
+    elif [ ! -f "docs/$file" ]; then
+        echo "⚠️  WARNING: $file exists in root but not in docs/"
+        errors=$((errors + 1))
     fi
 done
 
