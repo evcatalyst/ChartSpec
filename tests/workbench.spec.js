@@ -79,3 +79,57 @@ test('local model load is cancellable and recovers', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Send' })).toBeEnabled();
   expect(errors).toEqual([]);
 });
+
+test('local model worker failure clears busy state', async ({ page }) => {
+  const errors = captureConsoleErrors(page);
+
+  await page.addInitScript(() => {
+    class ExplodingWorker {
+      constructor() {
+        this._errorHandlers = [];
+        setTimeout(() => {
+          const evt = new ErrorEvent('error', { message: 'boom' });
+          if (typeof this.onerror === 'function') {
+            this.onerror(evt);
+          }
+          this._errorHandlers.forEach((handler) => handler(evt));
+        }, 200);
+      }
+      postMessage() {}
+      terminate() {}
+      addEventListener(type, handler) {
+        if (type === 'error') {
+          this._errorHandlers.push(handler);
+        }
+      }
+      removeEventListener(type, handler) {
+        if (type === 'error') {
+          this._errorHandlers = this._errorHandlers.filter((h) => h !== handler);
+        }
+      }
+    }
+    window.Worker = ExplodingWorker;
+  });
+
+  await page.goto('/workbench.html');
+  const loadButton = page.locator('#load-local-model');
+  await loadButton.click();
+
+  await expect(loadButton).toBeEnabled({ timeout: 5000 });
+  await expect(page.locator('.local-model-error')).toContainText(/Error/i);
+  await expect(page.getByRole('button', { name: 'Send' })).toBeEnabled();
+
+  await page.screenshot({ path: 'test-results/local-model-worker-error.png', fullPage: true });
+
+  // Ignore the intentional local model crash noise emitted by the stubbed worker
+  const allowedErrorFragments = [
+    'local model worker crashed',
+    'local model load failed',
+    'action "local-model" failed',
+  ];
+  const actionableErrors = errors.filter((msg) => {
+    const lower = msg.toLowerCase();
+    return !allowedErrorFragments.some((fragment) => lower.includes(fragment));
+  });
+  expect(actionableErrors).toEqual([]);
+});
