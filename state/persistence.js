@@ -122,17 +122,24 @@ function migrateStorage(fromVersion, toVersion) {
     };
     
     // Copy old values if they exist
-    if (localStorage.getItem(oldKeys.provider)) {
-      save(STORAGE_KEYS.PROVIDER, localStorage.getItem(oldKeys.provider));
+    const oldProvider = localStorage.getItem(oldKeys.provider);
+    if (oldProvider) {
+      save(STORAGE_KEYS.PROVIDER, oldProvider);
     }
-    if (localStorage.getItem(oldKeys.apiKey)) {
-      save(STORAGE_KEYS.API_KEY, localStorage.getItem(oldKeys.apiKey));
+    
+    const oldApiKey = localStorage.getItem(oldKeys.apiKey);
+    if (oldApiKey) {
+      save(STORAGE_KEYS.API_KEY, oldApiKey);
     }
-    if (localStorage.getItem(oldKeys.localMode)) {
-      save(STORAGE_KEYS.LOCAL_MODE, localStorage.getItem(oldKeys.localMode) === 'true');
+    
+    const oldLocalMode = localStorage.getItem(oldKeys.localMode);
+    if (oldLocalMode !== null) {
+      save(STORAGE_KEYS.LOCAL_MODE, oldLocalMode === 'true');
     }
-    if (localStorage.getItem(oldKeys.smartMode)) {
-      save(STORAGE_KEYS.SMART_MODE, localStorage.getItem(oldKeys.smartMode) === 'true');
+    
+    const oldSmartMode = localStorage.getItem(oldKeys.smartMode);
+    if (oldSmartMode !== null) {
+      save(STORAGE_KEYS.SMART_MODE, oldSmartMode === 'true');
     }
   }
 }
