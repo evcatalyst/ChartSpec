@@ -553,11 +553,10 @@ async function handleSendMessage() {
     // Handle Smart Mode (API-less with language parser + AVA)
     if (state.smartMode) {
       handleSmartModeMessage(userMessage);
-      // Don't return early - fall through to finally block
     } else if (!state.apiKey) {
       alert('Please provide an API key');
-      // Don't return early - fall through to finally block
     } else {
+      // LLM Mode processing
       // Clear input
       document.getElementById('user-message').value = '';
       
@@ -610,7 +609,6 @@ async function handleSendMessage() {
       } catch (error) {
         console.error('Error generating chart:', error);
         updateChatMessage(loadingId, `Error: ${error.message}`);
-        alert(`Error: ${error.message}`);
       }
     }
   } finally {
