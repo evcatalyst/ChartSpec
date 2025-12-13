@@ -10,12 +10,14 @@ class NLSettings extends HTMLElement {
       provider: 'openai',
       mode: 'smart',
     };
+    this.storeBound = false;
   }
   
   connectedCallback() {
-    this.render();
-    this.setupEventListeners();
     this.syncWithStore();
+    this.render();
+    this.attachDOMListeners();
+    this.attachStoreListeners();
   }
   
   render() {
@@ -37,7 +39,7 @@ class NLSettings extends HTMLElement {
     `;
   }
   
-  setupEventListeners() {
+  attachDOMListeners() {
     const providerSelect = this.querySelector('#nl-provider');
     const modeSelect = this.querySelector('#nl-mode');
     
@@ -58,14 +60,16 @@ class NLSettings extends HTMLElement {
         });
       });
     }
-    
-    // Listen for settings changes
+  }
+
+  attachStoreListeners() {
+    if (this.storeBound) return;
+    this.storeBound = true;
     store.on('settings:changed', (settings) => {
       if (settings.provider !== undefined) {
         this.state.provider = settings.provider;
       }
       
-      // Update mode based on flags
       if (settings.localMode) {
         this.state.mode = 'manual';
       } else if (settings.smartMode) {
@@ -75,7 +79,7 @@ class NLSettings extends HTMLElement {
       }
       
       this.render();
-      this.setupEventListeners();
+      this.attachDOMListeners();
     });
   }
   

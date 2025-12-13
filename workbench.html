@@ -10,22 +10,42 @@
   <link rel="stylesheet" href="./styles/app.css">
   <link rel="stylesheet" href="./styles/components.css">
   
-  <!-- Gridstack CSS (from CDN with fallback) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css" 
-        onerror="console.warn('Gridstack CSS failed to load from CDN')">
-  
-  <!-- External Libraries -->
-  <!-- Plotly.js for chart rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
-  
-  <!-- D3.js for data visualization -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  
-  <!-- AVA for intelligent chart recommendations -->
-  <script src="https://unpkg.com/@antv/ava@latest/dist/index.min.js"></script>
-  
-  <!-- Gridstack.js for grid layout -->
-  <script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
+  <script>
+    (function() {
+      if (window.__TEST_MODE__) {
+        const d3Script = document.createElement('script');
+        d3Script.src = './vendor/d3.v7.min.js';
+        document.head.appendChild(d3Script);
+        return;
+      }
+      const gridCss = document.createElement('link');
+      gridCss.rel = 'stylesheet';
+      gridCss.href = 'https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css';
+      gridCss.onerror = () => console.warn('Gridstack CSS failed to load from CDN');
+      document.head.appendChild(gridCss);
+
+      const plotlyScript = document.createElement('script');
+      plotlyScript.src = 'https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js';
+      document.head.appendChild(plotlyScript);
+
+      const d3Script = document.createElement('script');
+      d3Script.src = 'https://d3js.org/d3.v7.min.js';
+      d3Script.onerror = () => {
+        const fallback = document.createElement('script');
+        fallback.src = './vendor/d3.v7.min.js';
+        document.head.appendChild(fallback);
+      };
+      document.head.appendChild(d3Script);
+
+      const avaScript = document.createElement('script');
+      avaScript.src = 'https://unpkg.com/@antv/ava@latest/dist/index.min.js';
+      document.head.appendChild(avaScript);
+
+      const gridScript = document.createElement('script');
+      gridScript.src = 'https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js';
+      document.head.appendChild(gridScript);
+    })();
+  </script>
   
   <!-- Split.js for resizable panels (optional, inline fallback) -->
   <script>

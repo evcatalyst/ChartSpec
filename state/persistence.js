@@ -21,6 +21,9 @@ export const STORAGE_KEYS = {
   LOCAL_MODE: `${STORAGE_PREFIX}local_mode`,
   SMART_MODE: `${STORAGE_PREFIX}smart_mode`,
   SAMPLING_PRESET: `${STORAGE_PREFIX}sampling_preset`,
+  LOCAL_MODEL_SELECTION: `${STORAGE_PREFIX}local_model_selection`,
+  LOCAL_MODEL_LAST: `${STORAGE_PREFIX}local_model_last`,
+  LOCAL_MODEL_INFO: `${STORAGE_PREFIX}local_model_info`,
   
   // Dataset
   SELECTED_DATASET: `${STORAGE_PREFIX}selected_dataset`,
@@ -164,6 +167,14 @@ export function loadInitialState() {
     localMode: load(STORAGE_KEYS.LOCAL_MODE, false),
     smartMode: load(STORAGE_KEYS.SMART_MODE, false),
     samplingPreset: load(STORAGE_KEYS.SAMPLING_PRESET, '10'),
+    localModel: {
+      selection: load(STORAGE_KEYS.LOCAL_MODEL_SELECTION, 'smol-1.7b'),
+      lastLoaded: load(STORAGE_KEYS.LOCAL_MODEL_LAST, null),
+      info: load(STORAGE_KEYS.LOCAL_MODEL_INFO, null),
+      status: 'idle',
+      progress: 0,
+      error: null,
+    },
     
     // Dataset
     selectedDataset: load(STORAGE_KEYS.SELECTED_DATASET, null),
@@ -192,6 +203,13 @@ export function saveState(state) {
   save(STORAGE_KEYS.LOCAL_MODE, state.localMode);
   save(STORAGE_KEYS.SMART_MODE, state.smartMode);
   save(STORAGE_KEYS.SAMPLING_PRESET, state.samplingPreset);
+  if (state.localModel) {
+    save(STORAGE_KEYS.LOCAL_MODEL_SELECTION, state.localModel.selection);
+    save(STORAGE_KEYS.LOCAL_MODEL_LAST, state.localModel.lastLoaded || null);
+    if (state.localModel.info) {
+      save(STORAGE_KEYS.LOCAL_MODEL_INFO, state.localModel.info);
+    }
+  }
   
   save(STORAGE_KEYS.SELECTED_DATASET, state.selectedDataset);
   save(STORAGE_KEYS.THEME, state.theme);

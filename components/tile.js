@@ -9,6 +9,7 @@ class Tile extends HTMLElement {
     this.tileId = null;
     this.tileType = 'text';
     this.tileTitle = 'Untitled';
+    this.storeBound = false;
   }
   
   static get observedAttributes() {
@@ -32,6 +33,7 @@ class Tile extends HTMLElement {
     
     if (this.isConnected) {
       this.render();
+      this.attachDOMListeners();
     }
   }
   
@@ -41,7 +43,8 @@ class Tile extends HTMLElement {
     this.tileTitle = this.getAttribute('tile-title') || 'Untitled';
     
     this.render();
-    this.setupEventListeners();
+    this.attachDOMListeners();
+    this.attachStoreListeners();
   }
   
   render() {
@@ -94,7 +97,7 @@ class Tile extends HTMLElement {
     }
   }
   
-  setupEventListeners() {
+  attachDOMListeners() {
     // Tile actions
     this.querySelectorAll('.tile-action-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -103,8 +106,11 @@ class Tile extends HTMLElement {
         this.handleAction(action);
       });
     });
-    
-    // Listen for tile updates
+  }
+
+  attachStoreListeners() {
+    if (this.storeBound) return;
+    this.storeBound = true;
     store.on('tile:updated', (tileId, updates) => {
       if (tileId === this.tileId) {
         if (updates.title) {
@@ -114,6 +120,7 @@ class Tile extends HTMLElement {
           this.tileType = updates.type;
         }
         this.render();
+        this.attachDOMListeners();
       }
     });
   }

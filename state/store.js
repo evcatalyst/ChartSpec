@@ -25,10 +25,26 @@ class Store {
       localMode: false,
       smartMode: false,
       samplingPreset: '10', // percentage
+
+      // Local model state
+      localModel: {
+        selection: 'smol-1.7b',
+        status: 'idle',
+        progress: 0,
+        lastLoaded: null,
+        error: null,
+        info: null,
+      },
       
       // UI state
       presentationMode: false,
       layoutPreset: 'default',
+
+      // Busy state by scope
+      uiBusy: {},
+
+      // System messages / instrumentation
+      systemMessages: [],
       
       // ChartSpec state
       currentSpec: null,
@@ -40,7 +56,54 @@ class Store {
     this.listeners = new Map(); // event -> Set of callbacks
     this.middlewares = []; // State change middlewares
   }
-  
+
+  /**
+   * Set busy state for a scope
+   */
+  setBusy(scope, action = null) {
+    const uiBusy = { ...this.state.uiBusy, [scope]: action || true };
+    this.setState({ uiBusy });
+    this.emit('ui:busy', scope, action);
+  }
+
+  /**
+   * Clear busy state for a scope
+   */
+  clearBusy(scope) {
+    const uiBusy = { ...this.state.uiBusy };
+    delete uiBusy[scope];
+    this.setState({ uiBusy });
+    this.emit('ui:idle', scope);
+  }
+
+  /**
+   * Check busy state for scope
+   */
+  isBusy(scope) {
+    return Boolean(this.state.uiBusy[scope]);
+  }
+
+  /**
+   * Add system message for observability
+   */
+  addSystemMessage(level, message, meta = {}) {
+    const entry = {
+      id: `sys-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      level,
+      message,
+      meta,
+      timestamp: Date.now(),
+    };
+    const systemMessages = [...this.state.systemMessages, entry].slice(-20);
+    this.setState({ systemMessages });
+    this.emit('system:message', entry);
+  }
+
+  clearSystemMessages() {
+    this.setState({ systemMessages: [] });
+    this.emit('system:cleared');
+  }
+
   /**
    * Get current state (immutable)
    */
@@ -212,6 +275,12 @@ class Store {
   updateSettings(settings) {
     this.setState(settings);
     this.emit('settings:changed', settings);
+  }
+
+  updateLocalModel(updates) {
+    const localModel = { ...this.state.localModel, ...updates };
+    this.setState({ localModel });
+    this.emit('localmodel:changed', localModel);
   }
   
   /**

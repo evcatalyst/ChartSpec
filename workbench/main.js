@@ -17,6 +17,7 @@ import '../components/inspector-tile.js';
 import '../components/chat-drawer.js';
 import '../components/nl-settings.js';
 import '../components/led-sampler.js';
+import '../components/system-messages.js';
 
 // Import existing ChartSpec modules
 import { autoRegisterDemoDatasets, getDatasets, registerDataset, getDatasetRows, deleteDataset } from '../chartspec/datasetRegistry.js';
@@ -27,6 +28,8 @@ import { PlotlyRenderer } from '../chartspec/renderers/PlotlyRenderer.js';
 import { D3Renderer } from '../chartspec/renderers/D3Renderer.js';
 import { parseCommand, commandToSpec } from '../chartspec/languageParser.js';
 import { enhanceWithAva } from '../chartspec/avaIntegration.js';
+import { runUIAction, reportWarning } from './uiActions.js';
+import { loadSelectedLocalModel, runLocalInference } from './localModelManager.js';
 
 /**
  * Initialize the Workbench application
@@ -38,6 +41,9 @@ async function init() {
   console.log('📂 Loading saved state...');
   const savedState = loadInitialState();
   store.setState(savedState);
+
+  // 1b. Instrumentation
+  setupInstrumentation();
   
   // 2. Set up persistence middleware
   console.log('💾 Setting up auto-save...');
@@ -80,8 +86,13 @@ async function init() {
  * Initialize chart renderers
  */
 function initializeRenderers() {
-  rendererFactory.register(new PlotlyRenderer(), true);
-  rendererFactory.register(new D3Renderer(), false);
+  if (typeof window !== 'undefined' && window.__TEST_MODE__) {
+    rendererFactory.register(new D3Renderer(), true);
+    rendererFactory.register(new PlotlyRenderer(), false);
+  } else {
+    rendererFactory.register(new PlotlyRenderer(), true);
+    rendererFactory.register(new D3Renderer(), false);
+  }
   
   const renderers = rendererFactory.listRenderers();
   console.log('  Available renderers:', renderers);
@@ -148,7 +159,9 @@ async function loadDatasets() {
 function wireUpEvents() {
   // Chat message send event
   store.on('chat:send', async (message) => {
-    await handleChatMessage(message);
+    runUIAction('chat:send', () => handleChatMessage(message)).catch((error) => {
+      console.error('Chat send failed', error);
+    });
   });
   
   // Dataset selection from command bar
@@ -249,8 +262,10 @@ async function handleLLMMode(message) {
   const apiKey = store.get('apiKey');
   
   if (!apiKey) {
-    store.addChatMessage('assistant', 'Please provide an API key in settings.');
-    return;
+    if (provider !== 'local') {
+      store.addChatMessage('assistant', 'Please provide an API key in settings.');
+      return;
+    }
   }
   
   const datasets = store.get('datasets');
@@ -274,15 +289,35 @@ async function handleLLMMode(message) {
   const loadingId = store.addChatMessage('assistant', 'Generating chart specification...');
   
   try {
-    // Get spec from LLM
-    const spec = await getUpdatedChartSpec(
-      provider,
-      apiKey,
-      message,
-      columns,
-      sampleRows,
-      store.get('currentSpec')
-    );
+    let spec;
+    
+    if (provider === 'local') {
+      const modelState = store.get('localModel');
+      if (modelState.status !== 'ready') {
+        store.updateChatMessage(loadingId, 'Local model is not loaded. Click "Load model" first.');
+        return;
+      }
+      spec = await runLocalInference({
+        prompt: message,
+        columns,
+        rows: sampleRows,
+        testMode: Boolean(window.__TEST_MODE__),
+      });
+    } else {
+      spec = await getUpdatedChartSpec(
+        provider,
+        apiKey,
+        message,
+        columns,
+        sampleRows,
+        store.get('currentSpec')
+      );
+    }
+    
+    if (!spec) {
+      store.updateChatMessage(loadingId, 'No chart specification returned.');
+      return;
+    }
     
     // Update message with spec
     store.updateChatMessage(loadingId, JSON.stringify(spec, null, 2));
@@ -374,6 +409,31 @@ function showSettingsDialog() {
   }
 }
 
+function setupInstrumentation() {
+  if (typeof window === 'undefined') return;
+
+  const handler = (type) => (event) => {
+    const message = event?.reason?.message || event?.message || 'Unknown error';
+    store.addSystemMessage('error', message, { type, detail: event?.reason || event?.error });
+  };
+
+  window.addEventListener('error', handler('error'));
+  window.addEventListener('unhandledrejection', handler('unhandledrejection'));
+
+  if (window.__DEV_MONITOR__ || window.__TEST_MODE__) {
+    let last = performance.now();
+    const interval = 1000;
+    setInterval(() => {
+      const now = performance.now();
+      const lag = now - last - interval;
+      last = now;
+      if (lag > 200) {
+        reportWarning(`Event loop lag detected: ${Math.round(lag)}ms`, { lag });
+      }
+    }, interval);
+  }
+}
+
 // Initialize on load
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
@@ -387,5 +447,7 @@ if (typeof window !== 'undefined') {
     store,
     persistence,
     idb,
+    handleChatMessage,
+    loadSelectedLocalModel,
   };
 }
