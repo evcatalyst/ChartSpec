@@ -93,7 +93,7 @@ test('local model worker failure clears busy state', async ({ page }) => {
             this.onerror(evt);
           }
           this._errorHandlers.forEach((handler) => handler(evt));
-        }, 10);
+        }, 200);
       }
       postMessage() {}
       terminate() {}
@@ -116,7 +116,7 @@ test('local model worker failure clears busy state', async ({ page }) => {
   await loadButton.click();
 
   await expect(loadButton).toBeEnabled({ timeout: 5000 });
-  await expect(page.locator('.local-model-status')).toContainText(/Error|Not loaded/);
+  await expect(page.locator('.local-model-error')).toContainText(/Error/i);
   await expect(page.getByRole('button', { name: 'Send' })).toBeEnabled();
 
   await page.screenshot({ path: 'test-results/local-model-worker-error.png', fullPage: true });
