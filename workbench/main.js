@@ -31,7 +31,8 @@ import { enhanceWithAva } from '../chartspec/avaIntegration.js';
 import { runUIAction, reportWarning } from './uiActions.js';
 import { loadSelectedLocalModel, runLocalInference } from './localModelManager.js';
 
-const LAG_THRESHOLD_MS = 200;
+const LAG_THRESHOLD_MS = 400;
+const LAG_SAMPLE_INTERVAL_MS = 1000;
 
 function getRendererOrder() {
   const preferD3 = typeof window !== 'undefined' && window.__TEST_MODE__;
@@ -427,15 +428,14 @@ function setupInstrumentation() {
   let lagTimer = null;
   if (window.__DEV_MONITOR__ || window.__TEST_MODE__) {
     let last = performance.now();
-    const interval = 1000;
     lagTimer = setInterval(() => {
       const now = performance.now();
-      const lag = now - last - interval;
+      const lag = now - last - LAG_SAMPLE_INTERVAL_MS;
       last = now;
       if (lag > LAG_THRESHOLD_MS) {
         reportWarning(`Event loop lag detected: ${Math.round(lag)}ms`, { lag });
       }
-    }, interval);
+    }, LAG_SAMPLE_INTERVAL_MS);
   }
 
   window.addEventListener('beforeunload', () => {

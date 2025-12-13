@@ -11,6 +11,7 @@ class NLSettings extends HTMLElement {
       mode: 'smart',
     };
     this.storeBound = false;
+    this.storeUnsub = null;
   }
   
   connectedCallback() {
@@ -65,7 +66,7 @@ class NLSettings extends HTMLElement {
   attachStoreListeners() {
     if (this.storeBound) return;
     this.storeBound = true;
-    store.on('settings:changed', (settings) => {
+    this.storeUnsub = store.on('settings:changed', (settings) => {
       if (settings.provider !== undefined) {
         this.state.provider = settings.provider;
       }
@@ -81,6 +82,14 @@ class NLSettings extends HTMLElement {
       this.render();
       this.attachDOMListeners();
     });
+  }
+
+  disconnectedCallback() {
+    if (this.storeUnsub) {
+      this.storeUnsub();
+      this.storeUnsub = null;
+    }
+    this.storeBound = false;
   }
   
   syncWithStore() {

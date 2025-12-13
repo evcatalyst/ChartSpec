@@ -71,10 +71,14 @@ self.onmessage = (event) => {
     case 'cancel':
       canceled = true;
       break;
+    case 'shutdown':
+      clearActive();
+      break;
     case 'infer':
       runInference(event.data);
       break;
     default:
+      clearActive();
       emit({ type: 'error', error: `Unknown worker message type: ${type}` });
   }
 };
