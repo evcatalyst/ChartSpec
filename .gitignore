@@ -31,3 +31,6 @@ build/
 # Test coverage
 coverage/
 .nyc_output/
+
+# Playwright artifacts
+test-results/

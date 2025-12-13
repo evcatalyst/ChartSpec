@@ -16,7 +16,8 @@ function ensureWorker() {
   worker = new Worker(new URL('./workers/localModelWorker.js', import.meta.url), { type: 'module' });
   worker.onmessage = (event) => handleWorkerMessage(event.data);
   worker.onerror = (error) => {
-    store.updateLocalModel({ status: 'error', error: error.message || 'Worker error' });
+    const err = rejectPending(error);
+    store.updateLocalModel({ status: 'error', error: err.message || 'Worker error' });
     store.addSystemMessage('error', 'Local model worker crashed', { error: error.message });
   };
   return worker;
@@ -37,14 +38,10 @@ function handleWorkerMessage(data) {
       reportInfo(`Local model "${data.model}" ready`, { model: data.model });
       break;
     case 'error':
-      if (pendingLoad) {
-        pendingLoad.reject(new Error(data.error || 'Local model error'));
-        pendingLoad = null;
-      } else if (pendingInference) {
-        pendingInference.reject(new Error(data.error || 'Local model error'));
-        pendingInference = null;
+      {
+        const err = rejectPending(data.error || 'Local model error');
+        store.updateLocalModel({ status: 'error', error: err.message || 'Unknown error' });
       }
-      store.updateLocalModel({ status: 'error', error: data.error || 'Unknown error' });
       break;
     case 'canceled':
       if (pendingLoad) {
@@ -61,6 +58,19 @@ function handleWorkerMessage(data) {
       }
       break;
   }
+}
+
+function rejectPending(error) {
+  const err = error instanceof Error ? error : new Error(error?.message || error || 'Local model worker error');
+  if (pendingLoad) {
+    pendingLoad.reject(err);
+    pendingLoad = null;
+  }
+  if (pendingInference) {
+    pendingInference.reject(err);
+    pendingInference = null;
+  }
+  return err;
 }
 
 function startLoad(model, options = {}) {
