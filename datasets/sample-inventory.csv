@@ -1,0 +1,21 @@
+ProductID,ProductName,Category,Warehouse,Quantity,ReorderLevel,UnitCost,LastRestocked,Supplier
+P001,Widget A,Electronics,Warehouse A,450,100,12.50,2024-01-15,Supplier X
+P002,Widget B,Electronics,Warehouse A,320,100,15.75,2024-01-20,Supplier X
+P003,Widget C,Electronics,Warehouse B,280,100,18.25,2024-01-10,Supplier Y
+P004,Gadget A,Electronics,Warehouse B,150,50,45.00,2024-01-25,Supplier Y
+P005,Gadget B,Electronics,Warehouse A,220,75,38.50,2024-01-18,Supplier X
+P006,Tool A,Hardware,Warehouse C,380,150,8.75,2024-01-12,Supplier Z
+P007,Tool B,Hardware,Warehouse C,290,100,12.00,2024-01-22,Supplier Z
+P008,Tool C,Hardware,Warehouse B,410,125,10.50,2024-01-08,Supplier Y
+P009,Part A,Components,Warehouse A,520,200,3.25,2024-01-28,Supplier X
+P010,Part B,Components,Warehouse B,340,150,4.75,2024-01-14,Supplier Y
+P011,Part C,Components,Warehouse C,460,175,5.50,2024-01-19,Supplier Z
+P012,Assembly A,Finished Goods,Warehouse A,85,25,125.00,2024-01-16,Internal
+P013,Assembly B,Finished Goods,Warehouse B,95,30,145.00,2024-01-23,Internal
+P014,Assembly C,Finished Goods,Warehouse C,72,20,165.00,2024-01-11,Internal
+P015,Material A,Raw Materials,Warehouse A,680,250,2.50,2024-01-26,Supplier X
+P016,Material B,Raw Materials,Warehouse B,550,200,3.75,2024-01-13,Supplier Y
+P017,Material C,Raw Materials,Warehouse C,720,300,1.95,2024-01-21,Supplier Z
+P018,Consumable A,Supplies,Warehouse A,940,400,0.85,2024-01-17,Supplier X
+P019,Consumable B,Supplies,Warehouse B,810,350,1.20,2024-01-24,Supplier Y
+P020,Consumable C,Supplies,Warehouse C,1050,450,0.65,2024-01-09,Supplier Z

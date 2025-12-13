@@ -1,0 +1,21 @@
+EmployeeID,Name,Department,Position,Salary,HireDate,Age,YearsOfService,PerformanceRating
+E001,Alice Johnson,Engineering,Senior Developer,95000,2018-03-15,32,6,4.5
+E002,Bob Smith,Engineering,Junior Developer,65000,2021-06-01,26,3,4.0
+E003,Carol Williams,Marketing,Marketing Manager,85000,2019-01-10,35,5,4.7
+E004,David Brown,Sales,Sales Representative,70000,2020-04-20,29,4,4.2
+E005,Emma Davis,HR,HR Manager,80000,2017-11-05,38,7,4.6
+E006,Frank Miller,Engineering,Lead Developer,105000,2016-08-12,40,8,4.8
+E007,Grace Wilson,Finance,Financial Analyst,75000,2020-09-15,28,4,4.1
+E008,Henry Moore,Sales,Sales Manager,90000,2018-05-22,36,6,4.4
+E009,Ivy Taylor,Marketing,Content Writer,60000,2022-02-01,25,2,3.9
+E010,Jack Anderson,Engineering,DevOps Engineer,85000,2019-07-30,31,5,4.3
+E011,Karen Thomas,HR,HR Specialist,65000,2021-10-10,27,3,4.0
+E012,Leo Jackson,Finance,Senior Accountant,78000,2018-12-05,33,6,4.4
+E013,Mary White,Engineering,QA Engineer,72000,2020-03-18,30,4,4.2
+E014,Nathan Harris,Sales,Sales Representative,68000,2021-05-12,28,3,4.1
+E015,Olivia Martin,Marketing,Social Media Manager,70000,2019-09-25,29,5,4.5
+E016,Paul Thompson,Engineering,Junior Developer,62000,2022-01-15,24,2,3.8
+E017,Quinn Garcia,Finance,Budget Analyst,73000,2020-06-08,32,4,4.3
+E018,Rachel Martinez,HR,Recruiter,67000,2021-08-20,26,3,4.0
+E019,Sam Robinson,Engineering,Full Stack Developer,88000,2019-04-11,34,5,4.6
+E020,Tina Clark,Sales,Account Executive,82000,2018-07-28,37,6,4.5
