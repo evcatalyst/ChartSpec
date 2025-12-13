@@ -177,14 +177,19 @@ The following demo datasets are available for testing:
 **Goal**: Test LLM integration (requires API key)
 
 ### Steps:
-1. Disable Smart Mode, enable LLM Mode
-2. Enter OpenAI or Grok API key in settings
-3. Select "Sample Employees" dataset
-4. Chat: "Create a bar chart showing average salary by department"
-5. Chat: "Show me the distribution of performance ratings"
-6. Chat: "Which department has the highest average salary?"
-7. Verify LLM generates correct ChartSpecs
-8. Check token usage display
+1. Open settings/NL settings panel (look for settings icon or gear icon in UI)
+2. Uncheck "Smart Mode (AVA-Powered)" checkbox if checked
+3. Uncheck "Local Mode (No LLM)" checkbox if checked
+4. Select LLM provider (OpenAI or Grok)
+5. Enter API key in the API key field
+6. Select "Sample Employees" dataset from dataset dropdown
+7. Chat: "Create a bar chart showing average salary by department"
+8. Chat: "Show me the distribution of performance ratings"
+9. Chat: "Which department has the highest average salary?"
+10. Verify LLM generates correct ChartSpecs
+11. Check token usage display
+
+**Note**: Smart Mode and LLM Mode are mutually exclusive. When Smart Mode is enabled, the workbench uses local AVA-powered parsing. When disabled, it uses the selected LLM provider.
 
 ### Expected Results:
 - [ ] API key can be configured
@@ -270,14 +275,14 @@ The following demo datasets are available for testing:
 
 ### Steps:
 1. Try to create chart without selecting dataset
-2. Enter invalid command in Smart Mode
-3. Use LLM mode with invalid API key
-4. Try to load non-existent CSV file
-5. Import CSV with malformed data
-6. Create very complex chart spec
-7. Add many tiles to test performance limits
-8. Try rapid clicking/interaction
-9. Test with browser dev tools open
+2. Enter invalid command in Smart Mode (e.g., "xyz abc 123" or "show invalid chart type")
+3. Use LLM mode with invalid API key (e.g., "invalid-key-12345")
+4. Try to load non-existent CSV file (URL: `./datasets/does-not-exist.csv`)
+5. Import CSV with malformed data (missing commas, unmatched quotes, inconsistent column counts)
+6. Create very complex chart spec (e.g., 10+ filters, deeply nested aggregations, faceting with 20+ groups)
+7. Add many tiles to test performance limits (try creating 15-20 chart tiles)
+8. Try rapid clicking/interaction (quickly toggle chat drawer, switch datasets, create/delete tiles)
+9. Test with browser dev tools open (check for memory leaks, console errors)
 
 ### Expected Results:
 - [ ] Helpful error messages appear
@@ -389,11 +394,15 @@ The following demo datasets are available for testing:
 
 ## Known Limitations
 
-1. **LocalStorage Size**: Browser localStorage has 5-10MB limit
-2. **Large Datasets**: Files over 1MB may cause performance issues
-3. **Browser Compatibility**: Requires modern browser with ES6 modules
-4. **API Costs**: LLM mode requires paid API keys
-5. **Offline Mode**: Some features require internet connection
+1. **Browser Storage**: 
+   - LocalStorage has ~5MB total limit across all sites (browser-dependent)
+   - The workbench uses IndexedDB for better performance and larger storage
+   - Datasets are automatically migrated to IndexedDB
+   - Very large datasets (>10MB) may still cause performance issues
+2. **Large Datasets**: Files over 1MB may cause performance issues during initial load and rendering
+3. **Browser Compatibility**: Requires modern browser with ES6 modules, IndexedDB, and Fetch API
+4. **API Costs**: LLM mode requires paid API keys (OpenAI or Grok)
+5. **Offline Mode**: LLM mode and CDN resources require internet connection; Smart Mode works offline after initial load
 
 ## Recommended Testing Environments
 

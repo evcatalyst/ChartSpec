@@ -314,7 +314,9 @@ Edit `chartspec/datasetRegistry.js` to include new datasets in the auto-registra
 - **Small** (< 50 rows): Instant loading and rendering
 - **Medium** (50-500 rows): Fast loading, smooth rendering
 - **Large** (500-5000 rows): May need sampling, consider performance
-- **Very Large** (> 5000 rows): May exceed localStorage, use IndexedDB
+- **Very Large** (> 5000 rows): May exceed localStorage limits (typically 5-10MB total)
+
+**Note**: The workbench implements IndexedDB for dataset storage (see `state/idb.js`), which provides better performance and larger storage capacity than localStorage. Datasets are automatically migrated to IndexedDB on first load.
 
 ### Current Dataset Sizes
 | Dataset           | Rows | Size (KB) | Performance |
