@@ -3,6 +3,7 @@ import { listDemoDatasets } from '../chartspec/demoDatasets.js';
 import { fetchSocrataDataset, clearSocrataCache } from '../chartspec/socrataClient.js';
 
 const SAFE_ROW_LIMIT = 5000;
+const RAW_PAGE_LIMIT = 1000;
 
 class DemoGallery extends HTMLElement {
   constructor() {
@@ -270,7 +271,7 @@ class DemoGallery extends HTMLElement {
   buildParams(baseParams, state) {
     const params = { ...(baseParams || {}) };
     if (state.preset === 'raw') {
-      const limit = Math.min(parseInt(baseParams.$limit || 1000, 10) || 1000, 1000);
+      const limit = Math.min(parseInt(baseParams.$limit || RAW_PAGE_LIMIT, 10) || RAW_PAGE_LIMIT, RAW_PAGE_LIMIT);
       const page = Math.max(1, state.page || 1);
       params.$limit = limit;
       params.$offset = (page - 1) * limit;

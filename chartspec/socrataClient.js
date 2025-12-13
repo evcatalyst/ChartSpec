@@ -101,11 +101,12 @@ export async function fetchSocrataDataset({
 }
 
 export function clearSocrataCache(cacheKeyOrOptions) {
-  const cacheKey = typeof cacheKeyOrOptions === 'string'
-    ? cacheKeyOrOptions
-    : cacheKeyOrOptions
-      ? buildCacheKey(cacheKeyOrOptions)
-      : null;
+  let cacheKey = null;
+  if (typeof cacheKeyOrOptions === 'string') {
+    cacheKey = cacheKeyOrOptions;
+  } else if (cacheKeyOrOptions) {
+    cacheKey = buildCacheKey(cacheKeyOrOptions);
+  }
   if (!cacheKey) return;
   try {
     localStorage.removeItem(cacheKey);
