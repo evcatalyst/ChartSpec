@@ -553,67 +553,65 @@ async function handleSendMessage() {
     // Handle Smart Mode (API-less with language parser + AVA)
     if (state.smartMode) {
       handleSmartModeMessage(userMessage);
-      return;
-    }
-    
-    if (!state.apiKey) {
+      // Don't return early - fall through to finally block
+    } else if (!state.apiKey) {
       alert('Please provide an API key');
-      return;
-    }
-    
-    // Clear input
-    document.getElementById('user-message').value = '';
-    
-    // Add user message to chat
-    addChatMessage('user', userMessage);
-    
-    // Show loading
-    const loadingId = addChatMessage('assistant', 'Generating chart specification...');
-    
-    try {
-      // Get dataset info
-      const dataset = state.datasets.find(d => d.name === state.selectedDataset);
-      const columns = dataset.columns;
-      const sampleRows = state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT);
+      // Don't return early - fall through to finally block
+    } else {
+      // Clear input
+      document.getElementById('user-message').value = '';
       
-      // Get chart spec from LLM
-      const spec = await getUpdatedChartSpec(
-        state.provider,
-        state.apiKey,
-        userMessage,
-        columns,
-        sampleRows,
-        state.currentSpec
-      );
+      // Add user message to chat
+      addChatMessage('user', userMessage);
       
-      // Update chat with spec
-      updateChatMessage(loadingId, JSON.stringify(spec, null, 2));
+      // Show loading
+      const loadingId = addChatMessage('assistant', 'Generating chart specification...');
       
-      // Store spec
-      state.currentSpec = spec;
-      state.chatHistory.push({ role: 'user', content: userMessage });
-      state.chatHistory.push({ role: 'assistant', content: spec });
-      
-      // Apply spec to data
-      const transformedRows = applySpecToRows(state.currentRows, spec);
-      
-      console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
-      
-      // Render chart using renderer factory
-      const vizContainer = document.getElementById('visualization');
-      const renderer = rendererFactory.getBestRenderer(spec.chartType);
-      renderer.renderChart(vizContainer, transformedRows, spec);
-      
-      // Optional auto-refine
-      const autoRefine = document.getElementById('auto-refine')?.checked;
-      if (autoRefine && spec.chartType !== 'table' && spec.chartType !== 'tableOnly') {
-        setTimeout(() => handleAutoRefine(spec, columns, sampleRows), 1000);
+      try {
+        // Get dataset info
+        const dataset = state.datasets.find(d => d.name === state.selectedDataset);
+        const columns = dataset.columns;
+        const sampleRows = state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT);
+        
+        // Get chart spec from LLM
+        const spec = await getUpdatedChartSpec(
+          state.provider,
+          state.apiKey,
+          userMessage,
+          columns,
+          sampleRows,
+          state.currentSpec
+        );
+        
+        // Update chat with spec
+        updateChatMessage(loadingId, JSON.stringify(spec, null, 2));
+        
+        // Store spec
+        state.currentSpec = spec;
+        state.chatHistory.push({ role: 'user', content: userMessage });
+        state.chatHistory.push({ role: 'assistant', content: spec });
+        
+        // Apply spec to data
+        const transformedRows = applySpecToRows(state.currentRows, spec);
+        
+        console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
+        
+        // Render chart using renderer factory
+        const vizContainer = document.getElementById('visualization');
+        const renderer = rendererFactory.getBestRenderer(spec.chartType);
+        renderer.renderChart(vizContainer, transformedRows, spec);
+        
+        // Optional auto-refine
+        const autoRefine = document.getElementById('auto-refine')?.checked;
+        if (autoRefine && spec.chartType !== 'table' && spec.chartType !== 'tableOnly') {
+          setTimeout(() => handleAutoRefine(spec, columns, sampleRows), 1000);
+        }
+        
+      } catch (error) {
+        console.error('Error generating chart:', error);
+        updateChatMessage(loadingId, `Error: ${error.message}`);
+        alert(`Error: ${error.message}`);
       }
-      
-    } catch (error) {
-      console.error('Error generating chart:', error);
-      updateChatMessage(loadingId, `Error: ${error.message}`);
-      alert(`Error: ${error.message}`);
     }
   } finally {
     // Re-enable send button
