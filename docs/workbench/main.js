@@ -17,6 +17,7 @@ import '../components/inspector-tile.js';
 import '../components/chat-drawer.js';
 import '../components/nl-settings.js';
 import '../components/led-sampler.js';
+import '../components/demo-gallery.js';
 
 // Import existing ChartSpec modules
 import { autoRegisterDemoDatasets, getDatasets, registerDataset, getDatasetRows, deleteDataset } from '../chartspec/datasetRegistry.js';

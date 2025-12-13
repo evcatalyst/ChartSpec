@@ -26,6 +26,8 @@ class AppShell extends HTMLElement {
         <div class="splitter" id="drawer-splitter" style="display: none;"></div>
         <cs-chat-drawer></cs-chat-drawer>
       </div>
+      
+      <cs-demo-gallery></cs-demo-gallery>
     `;
     
     this.classList.add('fullscreen');

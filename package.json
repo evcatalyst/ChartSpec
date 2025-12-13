@@ -1,0 +1,16 @@
+{
+  "name": "chartspec",
+  "version": "1.0.0",
+  "description": "AI-powered data visualization assistant for browser-based chart creation. ChartSpec uses LLMs (OpenAI/Grok) to generate chart specifications from natural language, then renders them with multiple visualization libraries.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^27.3.0"
+  }
+}

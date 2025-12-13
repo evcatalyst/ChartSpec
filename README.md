@@ -122,6 +122,18 @@ The app comes with two demo datasets that are automatically registered on first 
 - **Sample Sales**: Sales data with Date, Region, Product, Quantity, and Revenue
 - **Sample Weather**: Weather data with Date, City, Temperature, Humidity, and Precipitation
 
+**Demo Gallery (NYS Open Data):**
+- [Food Service Establishment Inspections](https://health.data.ny.gov/Health/Food-Service-Establishment-Inspections-Beginning-2/2hcc-shji)
+- [Statewide Distributed Solar Projects](https://data.ny.gov/Energy-Environment/Statewide-Distributed-Solar-Projects-Beginning-200/wgsj-jt5f)
+- [Utility Energy Registry Monthly ZIP Code Energy Use](https://data.ny.gov/Energy-Environment/Utility-Energy-Registry-Monthly-ZIP-Code-Energy-Us/tzb9-c2c6)
+- [Motor Vehicle Crashes – Case Information](https://data.ny.gov/Transportation/Motor-Vehicle-Crashes-Case-Information-Three-Year-/e8ky-4vqe)
+
+Open the **Demo Gallery** from the command bar to load live Socrata data with guardrails:
+- **Data size presets**: *Chart-Ready Aggregate* (default, <=1k rows), *Quick Sample* (<=1k rows), *Raw Rows (paged)* (limit enforced, no full dataset pulls)
+- **Freshness presets**: *Live* (fetch each time) or *Cached* (15-minute TTL with refresh)
+
+To add another NYS Open Data dataset, update `chartspec/demoDatasets.js` (and the `/docs` copy) with domain, dataset ID, tags, and SoQL query presets.
+
 **Add Your Own Dataset:**
 1. Click "Add Dataset"
 2. Provide a name and CSV URL (relative or absolute)
