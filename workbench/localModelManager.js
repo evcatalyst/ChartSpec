@@ -3,6 +3,7 @@ import { runUIAction, reportInfo, reportWarning } from './uiActions.js';
 
 let worker = null;
 let pendingLoad = null;
+let pendingInference = null;
 
 const MODEL_LIBRARY = {
   'smol-1.7b': { label: 'SmolLM 1.7B (recommended)', sizeMB: 120, memoryGB: 2 },
@@ -39,6 +40,9 @@ function handleWorkerMessage(data) {
       if (pendingLoad) {
         pendingLoad.reject(new Error(data.error || 'Local model error'));
         pendingLoad = null;
+      } else if (pendingInference) {
+        pendingInference.reject(new Error(data.error || 'Local model error'));
+        pendingInference = null;
       }
       store.updateLocalModel({ status: 'error', error: data.error || 'Unknown error' });
       break;
@@ -51,9 +55,9 @@ function handleWorkerMessage(data) {
       reportInfo('Local model load canceled', { model: data.model });
       break;
     case 'inference:done':
-      if (pendingLoad && pendingLoad.type === 'inference') {
-        pendingLoad.resolve(data.spec);
-        pendingLoad = null;
+      if (pendingInference) {
+        pendingInference.resolve(data.spec);
+        pendingInference = null;
       }
       break;
   }
@@ -62,7 +66,7 @@ function handleWorkerMessage(data) {
 function startLoad(model, options = {}) {
   ensureWorker();
   return new Promise((resolve, reject) => {
-    pendingLoad = { resolve, reject, type: 'load' };
+    pendingLoad = { resolve, reject };
     worker.postMessage({ type: 'load', model, options: { ...options, testMode: options.testMode ?? Boolean(window.__TEST_MODE__) } });
   });
 }
@@ -70,7 +74,7 @@ function startLoad(model, options = {}) {
 function startInference(request) {
   ensureWorker();
   return new Promise((resolve, reject) => {
-    pendingLoad = { resolve, reject, type: 'inference' };
+    pendingInference = { resolve, reject };
     worker.postMessage({
       type: 'infer',
       ...request,

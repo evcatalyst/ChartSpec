@@ -10,6 +10,7 @@ class Tile extends HTMLElement {
     this.tileType = 'text';
     this.tileTitle = 'Untitled';
     this.storeBound = false;
+    this.storeUnsub = null;
   }
   
   static get observedAttributes() {
@@ -111,7 +112,7 @@ class Tile extends HTMLElement {
   attachStoreListeners() {
     if (this.storeBound) return;
     this.storeBound = true;
-    store.on('tile:updated', (tileId, updates) => {
+    this.storeUnsub = store.on('tile:updated', (tileId, updates) => {
       if (tileId === this.tileId) {
         if (updates.title) {
           this.tileTitle = updates.title;
@@ -123,6 +124,14 @@ class Tile extends HTMLElement {
         this.attachDOMListeners();
       }
     });
+  }
+
+  disconnectedCallback() {
+    if (this.storeUnsub) {
+      this.storeUnsub();
+      this.storeUnsub = null;
+    }
+    this.storeBound = false;
   }
   
   handleAction(action) {

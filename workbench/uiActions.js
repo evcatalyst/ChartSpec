@@ -1,16 +1,18 @@
 import store from '../state/store.js';
 
+const previousDisabled = new WeakMap();
+
 function flagControls(controls, disabled) {
   controls.forEach((control) => {
     if (!control) return;
     if (disabled) {
-      control.dataset._prevDisabled = control.disabled ? 'true' : 'false';
+      previousDisabled.set(control, control.disabled);
       control.disabled = true;
       control.classList.add('is-busy');
     } else {
-      const wasDisabled = control.dataset._prevDisabled === 'true';
-      delete control.dataset._prevDisabled;
-      control.disabled = wasDisabled ? true : false;
+      const wasDisabled = previousDisabled.get(control);
+      previousDisabled.delete(control);
+      control.disabled = wasDisabled || false;
       control.classList.remove('is-busy');
     }
   });

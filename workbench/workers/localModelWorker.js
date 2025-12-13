@@ -1,3 +1,8 @@
+const TEST_TOTAL_DURATION = 300;
+const PROD_TOTAL_DURATION = 4000;
+const TEST_STEP = 50;
+const PROD_STEP = 250;
+
 let activeTimer = null;
 let canceled = false;
 
@@ -16,8 +21,8 @@ function emit(message) {
 function startProgressLoop(model, options = {}) {
   clearActive();
   const testMode = options.testMode;
-  const totalDuration = testMode ? 300 : 4000;
-  const step = testMode ? 50 : 250;
+  const totalDuration = testMode ? TEST_TOTAL_DURATION : PROD_TOTAL_DURATION;
+  const step = testMode ? TEST_STEP : PROD_STEP;
   let elapsed = 0;
 
   activeTimer = setInterval(() => {

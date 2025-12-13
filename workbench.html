@@ -13,9 +13,9 @@
   <script>
     (function() {
       if (window.__TEST_MODE__) {
-        const d3Script = document.createElement('script');
-        d3Script.src = './vendor/d3.v7.min.js';
-        document.head.appendChild(d3Script);
+        const testD3Script = document.createElement('script');
+        testD3Script.src = './vendor/d3.v7.min.js';
+        document.head.appendChild(testD3Script);
         return;
       }
       const gridCss = document.createElement('link');
