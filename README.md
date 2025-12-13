@@ -4,6 +4,24 @@ AI-powered data visualization assistant for browser-based chart creation. ChartS
 
 **🚀 [Try ChartSpec Live](https://evcatalyst.github.io/ChartSpec/)** - No installation required!
 
+## 🆕 NEW: Workbench UI
+
+**Try the new full-screen Workbench**: [`workbench.html`](https://evcatalyst.github.io/ChartSpec/workbench.html)
+
+ChartSpec Workbench is a redesigned full-screen visualization workspace optimized for data exploration:
+
+- **🎛️ Tile-Based Workspace**: Multiple charts, tables, and inspectors simultaneously
+- **🔀 Draggable Grid**: Rearrange and resize tiles freely
+- **💬 Collapsible Chat**: Side drawer that can be hidden (Ctrl+B)
+- **🎨 Layout Presets**: Quick layouts (single, 2-up, dashboard)
+- **📊 LED Sampler**: Visual data sampling control
+- **🗄️ IndexedDB Storage**: Better performance for large datasets
+- **⌨️ Keyboard Shortcuts**: Ctrl+B (toggle chat), Ctrl+P (presentation mode), ESC (close)
+
+The classic UI remains available at [`index.html`](https://evcatalyst.github.io/ChartSpec/) for backward compatibility.
+
+**Documentation**: See [UI Architecture](docs/ui-architecture.md), [Storage Schema](docs/storage-schema.md), and [Migration Plan](docs/migration-plan.md).
+
 ## Features
 
 - 🎨 **Natural Language Charting**: Describe your desired visualization in plain English
