@@ -5,7 +5,9 @@
 **Environment**: Chromium Browser (Playwright), localhost:8080  
 **Test Coverage**: 10 User Journeys, 13 Detailed Steps
 
-**⚠️ Screenshot Limitation**: Screenshots captured in headless browser show UI structure only. Charts do not render due to CDN resource loading limitations in headless mode. Automated tests verified programmatic functionality (tile creation, state management, no errors), but visual chart rendering requires manual browser testing.
+**✅ D3 Rendering Verified**: D3.js successfully renders charts in headless browser mode when loaded from local vendor directory. Charts (bar, pie, scatter) confirmed working. See `docs/screenshots/test-d3-charts.png` for visual proof.
+
+**⚠️ Web Component Limitation**: Workbench custom elements don't fully render in current headless test setup, but underlying D3 rendering and data management work correctly.
 
 ---
 
