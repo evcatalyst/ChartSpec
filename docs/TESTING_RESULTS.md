@@ -5,6 +5,8 @@
 **Environment**: Chromium Browser (Playwright), localhost:8080  
 **Test Coverage**: 10 User Journeys, 13 Detailed Steps
 
+**⚠️ Screenshot Limitation**: Screenshots captured in headless browser show UI structure only. Charts do not render due to CDN resource loading limitations in headless mode. Automated tests verified programmatic functionality (tile creation, state management, no errors), but visual chart rendering requires manual browser testing.
+
 ---
 
 ## Executive Summary
@@ -60,7 +62,7 @@ The workbench successfully handles:
 - UI is responsive and properly themed (dark mode default)
 - No freezing or hanging on initial load
 
-**Screenshot**: `step-01-initial-load.png`
+**Screenshot**: `step-01-initial-load.png` (Note: Shows UI structure only; charts don't render in headless browser)
 
 ### 2. Dataset Management ✅
 
@@ -86,7 +88,7 @@ The workbench successfully handles:
 - Consider adding UI to import the new demo datasets
 - Add visual feedback when dataset is loading
 
-**Screenshot**: `step-02-dataset-management.png`
+**Screenshot**: `step-02-dataset-management.png` (Note: Shows UI structure only; charts don't render in headless browser)
 
 ### 3. Smart Mode (AVA-Powered) ✅
 
@@ -110,39 +112,50 @@ The workbench successfully handles:
 
 ### 4. Chart Creation ✅
 
-**Status**: EXCELLENT
+**Status**: PROGRAMMATICALLY VERIFIED
 
-**Chart Types Tested**:
+**Chart Types Tested** (tiles created successfully, visual rendering not verified in headless browser):
 1. ✅ **Bar Chart** - Revenue by Region
-   - Renders correctly
-   - Data displays accurately
-   - No performance issues
-   - Screenshot: `step-04-bar-chart.png`
+   - Tile created programmatically
+   - ChartSpec validated
+   - No JavaScript errors
+   - Screenshot: `step-04-bar-chart.png` (shows UI structure, chart not rendered)
 
 2. ✅ **Line Chart** - Revenue over time
-   - Renders correctly
-   - Timeline data handled properly
-   - Screenshot: `step-05-line-chart.png`
+   - Tile created programmatically
+   - ChartSpec validated
+   - Screenshot: `step-05-line-chart.png` (shows UI structure, chart not rendered)
 
 3. ✅ **Pie Chart** - Revenue by Product
-   - Renders correctly
-   - Labels and values displayed
-   - Screenshot: `step-06-pie-chart.png`
+   - Tile created programmatically
+   - ChartSpec validated
+   - Screenshot: `step-06-pie-chart.png` (shows UI structure, chart not rendered)
 
 4. ✅ **Table View** - Data table
-   - Displays all data correctly
-   - Readable and well-formatted
-   - Screenshot: `step-07-table-view.png`
+   - Tile created programmatically
+   - Data passed correctly
+   - Screenshot: `step-07-table-view.png` (shows UI structure, table not rendered)
 
 5. ✅ **Scatter Plot** - Temperature vs Humidity
+   - Tile created programmatically
    - Multi-dimensional data handled
-   - Color coding works (by City)
-   - Screenshot: `step-09-scatter-plot.png`
+   - Screenshot: `step-09-scatter-plot.png` (shows UI structure, chart not rendered)
 
-**Performance**:
-- All charts render within 2 seconds
-- No freezing during chart creation
-- Multiple charts can coexist without performance degradation
+**What Was Verified**:
+- Tile creation API works correctly
+- ChartSpec generation succeeds
+- Data passes correctly to tiles
+- No JavaScript errors during chart tile creation
+- State management works properly
+
+**What Was NOT Verified** (headless browser limitation):
+- Actual visual chart rendering
+- Chart interactivity
+- Plotly.js rendering
+- Canvas/WebGL rendering
+- Final visual appearance
+
+**Recommendation**: Manual browser testing required to verify actual chart rendering.
 
 ### 5. Workspace Management ✅
 
@@ -160,7 +173,7 @@ The workbench successfully handles:
 - ✅ Tile data isolation
 - ✅ Inspector tile functionality
 
-**Screenshot**: `step-10-inspector.png`
+**Screenshot**: `step-10-inspector.png` (shows UI structure, content not rendered)
 
 ### 6. Keyboard Shortcuts ✅
 
@@ -168,14 +181,14 @@ The workbench successfully handles:
 
 **Shortcuts Tested**:
 1. ✅ **Ctrl+B** - Toggle chat drawer
-   - Works correctly
-   - Smooth animation
-   - Screenshot: `step-11a-chat-hidden.png`
+   - Keyboard event handled correctly
+   - State change verified
+   - Screenshot: `step-11a-chat-hidden.png` (shows layout change)
 
 2. ✅ **Ctrl+P** - Presentation mode
-   - Activates correctly
-   - Visual change observed
-   - Screenshot: `step-11c-presentation-mode.png`
+   - Keyboard event handled correctly
+   - State change verified
+   - Screenshot: `step-11c-presentation-mode.png` (if available)
 
 **Recommendations**:
 - Add visual feedback when shortcuts are activated
@@ -373,18 +386,18 @@ Three new demo datasets have been added for comprehensive testing:
 
 ## Screenshots Reference
 
-All test screenshots are saved in `docs/screenshots/`:
+**⚠️ Screenshot Limitation**: All screenshots captured in headless browser show UI structure only. Charts do not render due to CDN resource loading limitations in headless mode. See `docs/screenshots/README.md` for details.
 
-1. `step-01-initial-load.png` - Initial page load
-2. `step-04-bar-chart.png` - Bar chart rendering
-3. `step-05-line-chart.png` - Line chart rendering
-4. `step-06-pie-chart.png` - Pie chart rendering
-5. `step-07-table-view.png` - Table view
-6. `step-09-scatter-plot.png` - Scatter plot rendering
-7. `step-10-inspector.png` - Inspector tile
-8. `step-11a-chat-hidden.png` - Chat drawer hidden
-9. `step-11b-chat-shown.png` - Chat drawer shown
-10. `step-11c-presentation-mode.png` - Presentation mode
+Screenshots saved in `docs/screenshots/`:
+
+1. `step-01-initial-load.png` - Initial page load (UI structure)
+2. `step-04-bar-chart.png` - Bar chart tile created (chart not rendered)
+3. `step-05-line-chart.png` - Line chart tile created (chart not rendered)
+4. `step-06-pie-chart.png` - Pie chart tile created (chart not rendered)
+5. `step-07-table-view.png` - Table tile created (table not rendered)
+6. `step-09-scatter-plot.png` - Scatter plot tile created (chart not rendered)
+7. `step-10-inspector.png` - Inspector tile created (content not rendered)
+8. `step-11a-chat-hidden.png` - Chat drawer hidden (layout change visible)
 
 ---
 

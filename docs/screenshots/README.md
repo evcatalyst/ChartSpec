@@ -2,9 +2,30 @@
 
 This directory contains screenshots captured during automated testing of the ChartSpec Workbench.
 
+## ⚠️ Important Note
+
+**Limitation**: Screenshots captured in headless browser environment show the workbench UI structure but **do not display rendered charts**. This is a known limitation of automated screenshot capture with:
+- CDN-loaded libraries (Plotly.js, D3.js, Gridstack) not loading in headless mode
+- Web components requiring full browser context
+- Chart rendering requiring GPU/Canvas acceleration
+
+**What the screenshots DO show**:
+- Workbench UI layout and structure
+- App shell, chat drawer, workspace grid
+- Theme and general appearance
+- Page load state
+
+**What the screenshots DO NOT show**:
+- Actual rendered charts (bar, line, pie, scatter)
+- Chart data visualization
+- Interactive chart features
+- Fully populated tiles with chart content
+
+For actual chart rendering verification, manual testing in a standard browser is required.
+
 ## Test Environment
 
-- **Browser**: Chromium (Playwright)
+- **Browser**: Chromium (Playwright - Headless)
 - **Viewport**: 1920x1080
 - **Server**: localhost:8080
 - **Date**: December 13, 2024
@@ -15,66 +36,64 @@ This directory contains screenshots captured during automated testing of the Cha
 - **step-01-initial-load.png** - Workbench initial state after loading
   - Shows app shell, chat drawer, empty workspace
   - Dark theme applied
-  - Demo datasets loaded
+  - Demo datasets loaded in state (not visible in screenshot)
 
-### Chart Types
+### Attempted Chart Captures (Tiles Created but Charts Not Rendered)
 
-- **step-04-bar-chart.png** - Bar chart rendering
-  - Chart type: Bar
-  - Data: Revenue by Region (Sample Sales)
-  - Shows tile-based workspace with chart
+- **step-04-bar-chart.png** - Bar chart tile created (chart not visible)
+  - Tile created programmatically but chart doesn't render in headless browser
+  - Intended chart: Revenue by Region (Sample Sales)
 
-- **step-05-line-chart.png** - Line chart rendering
-  - Chart type: Line
-  - Data: Revenue over time (Sample Sales)
-  - Multiple tiles in workspace
+- **step-05-line-chart.png** - Line chart tile created (chart not visible)
+  - Tile created programmatically but chart doesn't render in headless browser
+  - Intended chart: Revenue over time
 
-- **step-06-pie-chart.png** - Pie chart rendering
-  - Chart type: Pie
-  - Data: Revenue by Product (Sample Sales)
-  - Shows multiple simultaneous charts
+- **step-06-pie-chart.png** - Pie chart tile created (chart not visible)
+  - Tile created programmatically but chart doesn't render in headless browser
+  - Intended chart: Revenue by Product
 
-- **step-07-table-view.png** - Table view
-  - Chart type: Table
-  - Data: Sales data table
-  - Shows data in tabular format
+- **step-07-table-view.png** - Table tile created (data not visible)
+  - Tile created programmatically but table doesn't render in headless browser
 
-- **step-09-scatter-plot.png** - Scatter plot rendering
-  - Chart type: Scatter
-  - Data: Temperature vs Humidity (Sample Weather)
-  - Color coded by City
-  - Dataset switching demonstrated
+- **step-09-scatter-plot.png** - Scatter plot tile created (chart not visible)
+  - Tile created programmatically but chart doesn't render in headless browser
+  - Intended chart: Temperature vs Humidity
 
 ### Features
 
-- **step-10-inspector.png** - Inspector tile
-  - Shows inspector tile functionality
-  - ChartSpec JSON display
-  - Multiple tiles in workspace
+- **step-10-inspector.png** - Inspector tile created (content not visible)
+  - Tile created programmatically but content doesn't render in headless browser
 
-- **step-11a-chat-hidden.png** - Chat drawer hidden
-  - Keyboard shortcut (Ctrl+B) demonstrated
-  - Chat drawer collapsed
-  - Full workspace view
+- **step-11a-chat-hidden.png** - Chat drawer toggle
+  - Shows chat drawer in hidden state
+  - Demonstrates Ctrl+B keyboard shortcut effect on layout
 
-## What Was Tested
+## What Was Actually Tested
 
-All screenshots demonstrate successful functionality:
-- ✅ Chart rendering (all types)
-- ✅ Multiple tiles working simultaneously
-- ✅ Dataset loading and switching
-- ✅ Keyboard shortcuts
-- ✅ UI responsiveness
-- ✅ Workspace management
+Automated tests verified programmatic functionality:
+- ✅ JavaScript execution and store state management
+- ✅ Tile creation via store API
+- ✅ Dataset loading and selection
+- ✅ Keyboard event handling
+- ✅ No JavaScript errors or crashes
+- ✅ State persistence
+
+**Not verified by screenshots**:
+- ❌ Visual chart rendering
+- ❌ Chart interactivity
+- ❌ Data display in tables
+- ❌ Full tile content rendering
 
 ## Performance
 
-All screenshots were captured during automated tests that confirmed:
+Automated tests confirmed programmatic functionality:
 - Page load time: < 3 seconds
-- Chart rendering: < 2 seconds per chart
+- Tile creation via API: Instant
 - No freezing or hanging
 - No memory leaks
-- Smooth UI interactions
+- Smooth UI state transitions
+
+**Note**: Chart rendering performance could not be measured in headless browser as charts do not render without full browser context and CDN resources.
 
 ## Related Documentation
 
