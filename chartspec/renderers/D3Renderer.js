@@ -70,7 +70,8 @@ export class D3Renderer extends BaseRenderer {
     
     // Set up SVG dimensions
     const margin = { top: 50, right: 30, bottom: 50, left: 60 };
-    const width = container.offsetWidth - margin.left - margin.right;
+    const containerWidth = container.offsetWidth || 640;
+    const width = Math.max(320, containerWidth) - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
     
     // Create SVG

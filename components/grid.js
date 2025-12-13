@@ -8,6 +8,7 @@ class Grid extends HTMLElement {
     super();
     this.grid = null;
     this.tiles = [];
+    this.isFallback = false;
   }
   
   connectedCallback() {
@@ -66,6 +67,7 @@ class Grid extends HTMLElement {
   
   useFallbackLayout() {
     // Simple flexbox fallback when Gridstack isn't available
+    this.isFallback = true;
     const gridEl = this.querySelector('#grid-stack');
     gridEl.style.display = 'grid';
     gridEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
@@ -107,13 +109,18 @@ class Grid extends HTMLElement {
   }
   
   addTile(tile, saveLayout = true) {
+    const tileEl = this.createTileElement(tile);
+
+    if (this.isFallback) {
+      tileEl.setAttribute('data-tile-id', tile.id);
+      this.querySelector('#grid-stack')?.appendChild(tileEl);
+      return;
+    }
+
     if (!this.grid) {
       console.warn('Grid not initialized');
       return;
     }
-    
-    // Create tile element
-    const tileEl = this.createTileElement(tile);
     
     // Add to grid
     const widget = this.grid.addWidget(tileEl, {
@@ -150,6 +157,11 @@ class Grid extends HTMLElement {
   }
   
   removeTile(tileId) {
+    if (this.isFallback) {
+      this.querySelector(`[data-tile-id="${tileId}"]`)?.remove();
+      return;
+    }
+
     if (!this.grid) return;
     
     const widget = this.grid.engine.nodes.find(n => n.id === tileId);
@@ -193,6 +205,7 @@ class Grid extends HTMLElement {
   }
   
   applyLayoutPreset(preset) {
+    if (this.isFallback) return;
     if (!this.grid) return;
     
     const tiles = store.get('tiles');

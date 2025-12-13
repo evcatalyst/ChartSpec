@@ -115,6 +115,12 @@ Manual ChartSpec JSON editing for advanced users:
 - Learning the ChartSpec schema
 - Debugging and testing
 
+#### 💻 Local Model workflow (Workbench)
+- Selecting **Local** in the Workbench provider menu only updates preferences; it does **not** auto-download models.
+- Use the **Load model** button in the chat drawer to start a Web Worker–backed download/warmup with progress and cancel controls.
+- Warnings surface WebGPU/storage checks and any errors in the in-app System Messages panel (plus console).
+- A lightweight stub loader runs when `window.__TEST_MODE__` is set, avoiding large downloads in CI while still exercising the UI.
+
 ### 3. Load a Dataset
 
 **Use Demo Datasets:**
@@ -182,6 +188,12 @@ For production use with large datasets, consider:
 - **Select**: Choose dataset from dropdown
 - **Reload**: Re-fetch and update dataset from original URL
 - **Delete**: Remove dataset and its data from localStorage
+
+## Testing & Observability
+
+- End-to-end coverage uses Playwright (`npm test`) with a built-in static server (`npm run serve`).
+- CI and local tests enable `window.__TEST_MODE__` to use the stub local-model loader and D3 fallback renderer.
+- All unhandled errors are echoed into the System Messages panel in the Workbench; clearing it does not affect console logs.
 
 ## Demo Datasets
 

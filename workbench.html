@@ -10,22 +10,39 @@
   <link rel="stylesheet" href="./styles/app.css">
   <link rel="stylesheet" href="./styles/components.css">
   
-  <!-- Gridstack CSS (from CDN with fallback) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css" 
-        onerror="console.warn('Gridstack CSS failed to load from CDN')">
-  
-  <!-- External Libraries -->
-  <!-- Plotly.js for chart rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js"></script>
-  
-  <!-- D3.js for data visualization -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  
-  <!-- AVA for intelligent chart recommendations -->
-  <script src="https://unpkg.com/@antv/ava@latest/dist/index.min.js"></script>
-  
-  <!-- Gridstack.js for grid layout -->
-  <script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
+  <script>
+    (function() {
+      const loadScript = (src, onError) => {
+        const script = document.createElement('script');
+        script.src = src;
+        if (onError) {
+          script.onerror = onError;
+        }
+        document.head.appendChild(script);
+        return script;
+      };
+
+      const loadScriptWithFallback = (primary, fallback) =>
+        loadScript(primary, () => loadScript(fallback));
+
+      if (window.__TEST_MODE__) {
+        const testD3Script = document.createElement('script');
+        testD3Script.src = './vendor/d3.v7.min.js';
+        document.head.appendChild(testD3Script);
+        return;
+      }
+      const gridCss = document.createElement('link');
+      gridCss.rel = 'stylesheet';
+      gridCss.href = 'https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css';
+      gridCss.onerror = () => console.warn('Gridstack CSS failed to load from CDN');
+      document.head.appendChild(gridCss);
+
+      loadScript('https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js');
+      loadScriptWithFallback('https://d3js.org/d3.v7.min.js', './vendor/d3.v7.min.js');
+      loadScript('https://unpkg.com/@antv/ava@latest/dist/index.min.js');
+      loadScript('https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js');
+    })();
+  </script>
   
   <!-- Split.js for resizable panels (optional, inline fallback) -->
   <script>
