@@ -18,7 +18,7 @@ function ensureWorker() {
   worker.onerror = (error) => {
     const err = rejectPending(error);
     store.updateLocalModel({ status: 'error', error: err.message || 'Worker error' });
-    store.addSystemMessage('error', 'Local model worker crashed', { error: error.message });
+    store.addSystemMessage('error', 'Local model worker crashed', { error: err.message });
   };
   return worker;
 }

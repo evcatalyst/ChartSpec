@@ -122,9 +122,14 @@ test('local model worker failure clears busy state', async ({ page }) => {
   await page.screenshot({ path: 'test-results/local-model-worker-error.png', fullPage: true });
 
   // Ignore the intentional local model crash noise emitted by the stubbed worker
+  const allowedErrorFragments = [
+    'local model worker crashed',
+    'local model load failed',
+    'action "local-model" failed',
+  ];
   const actionableErrors = errors.filter((msg) => {
     const lower = msg.toLowerCase();
-    return !lower.includes('local model') && !lower.includes('local-model');
+    return !allowedErrorFragments.some((fragment) => lower.includes(fragment));
   });
   expect(actionableErrors).toEqual([]);
 });
