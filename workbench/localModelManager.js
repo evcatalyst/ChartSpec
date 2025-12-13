@@ -108,7 +108,7 @@ export function cancelLocalModelLoad() {
 }
 
 async function preflightChecks(info) {
-  if (typeof navigator !== 'undefined' && !('gpu' in navigator)) {
+  if (typeof navigator !== 'undefined' && (!navigator.gpu || typeof navigator.gpu.requestAdapter !== 'function')) {
     reportWarning('WebGPU not detected, falling back to CPU', { feature: 'webgpu' });
   }
 

@@ -29,6 +29,10 @@ class ChatDrawer extends HTMLElement {
     this.storeUnsubscribers.forEach((fn) => fn && fn());
     this.storeUnsubscribers = [];
     this.storeBound = false;
+    if (this._messageActionHandler) {
+      this.removeEventListener('click', this._messageActionHandler);
+      this._messageActionHandler = null;
+    }
   }
   
   render() {

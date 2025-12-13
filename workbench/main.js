@@ -86,13 +86,11 @@ async function init() {
  * Initialize chart renderers
  */
 function initializeRenderers() {
-  if (typeof window !== 'undefined' && window.__TEST_MODE__) {
-    rendererFactory.register(new D3Renderer(), true);
-    rendererFactory.register(new PlotlyRenderer(), false);
-  } else {
-    rendererFactory.register(new PlotlyRenderer(), true);
-    rendererFactory.register(new D3Renderer(), false);
-  }
+  const preferD3 = typeof window !== 'undefined' && window.__TEST_MODE__;
+  const rendererOrder = preferD3
+    ? [new D3Renderer(), new PlotlyRenderer()]
+    : [new PlotlyRenderer(), new D3Renderer()];
+  rendererOrder.forEach((renderer, index) => rendererFactory.register(renderer, index === 0));
   
   const renderers = rendererFactory.listRenderers();
   console.log('  Available renderers:', renderers);
@@ -420,10 +418,11 @@ function setupInstrumentation() {
   window.addEventListener('error', handler('error'));
   window.addEventListener('unhandledrejection', handler('unhandledrejection'));
 
+  let lagTimer = null;
   if (window.__DEV_MONITOR__ || window.__TEST_MODE__) {
     let last = performance.now();
     const interval = 1000;
-    setInterval(() => {
+    lagTimer = setInterval(() => {
       const now = performance.now();
       const lag = now - last - interval;
       last = now;
@@ -432,6 +431,13 @@ function setupInstrumentation() {
       }
     }, interval);
   }
+
+  window.addEventListener('beforeunload', () => {
+    if (lagTimer) {
+      clearInterval(lagTimer);
+      lagTimer = null;
+    }
+  });
 }
 
 // Initialize on load

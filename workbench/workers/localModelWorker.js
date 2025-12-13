@@ -45,7 +45,7 @@ function startProgressLoop(model, options = {}) {
 }
 
 function runInference(request) {
-  const { prompt, columns, rows = [], testMode } = request;
+  const { prompt, columns, testMode } = request;
   const delay = testMode ? 120 : 500;
   setTimeout(() => {
     const x = columns?.[0] || 'x';
