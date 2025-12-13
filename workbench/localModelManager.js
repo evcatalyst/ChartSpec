@@ -61,7 +61,8 @@ function handleWorkerMessage(data) {
 }
 
 function rejectPending(error) {
-  const err = error instanceof Error ? error : new Error(error?.message || error || 'Local model worker error');
+  const message = typeof error === 'string' ? error : error?.message;
+  const err = error instanceof Error ? error : new Error(message || 'Local model worker error');
   if (pendingLoad) {
     pendingLoad.reject(err);
     pendingLoad = null;
