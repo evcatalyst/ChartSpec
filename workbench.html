@@ -12,6 +12,19 @@
   
   <script>
     (function() {
+      const loadScript = (src, onError) => {
+        const script = document.createElement('script');
+        script.src = src;
+        if (onError) {
+          script.onerror = onError;
+        }
+        document.head.appendChild(script);
+        return script;
+      };
+
+      const loadScriptWithFallback = (primary, fallback) =>
+        loadScript(primary, () => loadScript(fallback));
+
       if (window.__TEST_MODE__) {
         const testD3Script = document.createElement('script');
         testD3Script.src = './vendor/d3.v7.min.js';
@@ -24,26 +37,10 @@
       gridCss.onerror = () => console.warn('Gridstack CSS failed to load from CDN');
       document.head.appendChild(gridCss);
 
-      const plotlyScript = document.createElement('script');
-      plotlyScript.src = 'https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js';
-      document.head.appendChild(plotlyScript);
-
-      const d3Script = document.createElement('script');
-      d3Script.src = 'https://d3js.org/d3.v7.min.js';
-      d3Script.onerror = () => {
-        const fallback = document.createElement('script');
-        fallback.src = './vendor/d3.v7.min.js';
-        document.head.appendChild(fallback);
-      };
-      document.head.appendChild(d3Script);
-
-      const avaScript = document.createElement('script');
-      avaScript.src = 'https://unpkg.com/@antv/ava@latest/dist/index.min.js';
-      document.head.appendChild(avaScript);
-
-      const gridScript = document.createElement('script');
-      gridScript.src = 'https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js';
-      document.head.appendChild(gridScript);
+      loadScript('https://cdn.jsdelivr.net/npm/plotly.js-dist@2.27.0/plotly.min.js');
+      loadScriptWithFallback('https://d3js.org/d3.v7.min.js', './vendor/d3.v7.min.js');
+      loadScript('https://unpkg.com/@antv/ava@latest/dist/index.min.js');
+      loadScript('https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js');
     })();
   </script>
   

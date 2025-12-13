@@ -11,6 +11,7 @@ class Tile extends HTMLElement {
     this.tileTitle = 'Untitled';
     this.storeBound = false;
     this.storeUnsub = null;
+    this._actionHandler = null;
   }
   
   static get observedAttributes() {
@@ -99,14 +100,16 @@ class Tile extends HTMLElement {
   }
   
   attachDOMListeners() {
-    // Tile actions
-    this.querySelectorAll('.tile-action-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    if (this._actionHandler) return;
+    this._actionHandler = (e) => {
+      const btn = e.target.closest('.tile-action-btn');
+      if (btn) {
         e.stopPropagation();
         const action = btn.dataset.action;
         this.handleAction(action);
-      });
-    });
+      }
+    };
+    this.addEventListener('click', this._actionHandler);
   }
 
   attachStoreListeners() {
@@ -132,6 +135,10 @@ class Tile extends HTMLElement {
       this.storeUnsub = null;
     }
     this.storeBound = false;
+    if (this._actionHandler) {
+      this.removeEventListener('click', this._actionHandler);
+      this._actionHandler = null;
+    }
   }
   
   handleAction(action) {

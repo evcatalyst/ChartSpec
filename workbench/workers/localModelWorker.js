@@ -2,6 +2,7 @@ const TEST_TOTAL_DURATION = 300;
 const PROD_TOTAL_DURATION = 4000;
 const TEST_STEP = 50;
 const PROD_STEP = 250;
+const PROMPT_SLICE_LENGTH = 40;
 
 let activeTimer = null;
 let canceled = false;
@@ -51,7 +52,7 @@ function runInference(request) {
     const x = columns?.[0] || 'x';
     const y = columns?.[1] || 'y';
     const spec = {
-      title: `Local result for "${prompt.slice(0, 40)}"`,
+      title: `Local result for "${prompt.slice(0, PROMPT_SLICE_LENGTH)}"`,
       chartType: 'bar',
       x,
       y,

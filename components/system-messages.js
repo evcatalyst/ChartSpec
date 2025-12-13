@@ -5,6 +5,8 @@ class SystemMessages extends HTMLElement {
     super();
     this.messages = [];
     this.bound = false;
+    this.domBound = false;
+    this._clearHandler = null;
   }
 
   connectedCallback() {
@@ -31,9 +33,23 @@ class SystemMessages extends HTMLElement {
   }
 
   attachDOMListeners() {
-    this.querySelector('[data-action="clear-messages"]')?.addEventListener('click', () => {
-      store.clearSystemMessages();
-    });
+    if (this.domBound) return;
+    this.domBound = true;
+    this._clearHandler = (event) => {
+      const actionEl = event.target.closest('[data-action="clear-messages"]');
+      if (actionEl) {
+        store.clearSystemMessages();
+      }
+    };
+    this.addEventListener('click', this._clearHandler);
+  }
+
+  disconnectedCallback() {
+    if (this._clearHandler) {
+      this.removeEventListener('click', this._clearHandler);
+      this._clearHandler = null;
+    }
+    this.domBound = false;
   }
 
   render() {

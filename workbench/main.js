@@ -31,6 +31,15 @@ import { enhanceWithAva } from '../chartspec/avaIntegration.js';
 import { runUIAction, reportWarning } from './uiActions.js';
 import { loadSelectedLocalModel, runLocalInference } from './localModelManager.js';
 
+const LAG_THRESHOLD_MS = 200;
+
+function getRendererOrder() {
+  const preferD3 = typeof window !== 'undefined' && window.__TEST_MODE__;
+  return preferD3
+    ? [new D3Renderer(), new PlotlyRenderer()]
+    : [new PlotlyRenderer(), new D3Renderer()];
+}
+
 /**
  * Initialize the Workbench application
  */
@@ -86,10 +95,7 @@ async function init() {
  * Initialize chart renderers
  */
 function initializeRenderers() {
-  const preferD3 = typeof window !== 'undefined' && window.__TEST_MODE__;
-  const rendererOrder = preferD3
-    ? [new D3Renderer(), new PlotlyRenderer()]
-    : [new PlotlyRenderer(), new D3Renderer()];
+  const rendererOrder = getRendererOrder();
   rendererOrder.forEach((renderer, index) => rendererFactory.register(renderer, index === 0));
   
   const renderers = rendererFactory.listRenderers();
@@ -426,7 +432,7 @@ function setupInstrumentation() {
       const now = performance.now();
       const lag = now - last - interval;
       last = now;
-      if (lag > 200) {
+      if (lag > LAG_THRESHOLD_MS) {
         reportWarning(`Event loop lag detected: ${Math.round(lag)}ms`, { lag });
       }
     }, interval);
