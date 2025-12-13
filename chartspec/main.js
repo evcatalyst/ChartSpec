@@ -543,70 +543,82 @@ async function handleSendMessage() {
     return;
   }
   
-  // Handle Smart Mode (API-less with language parser + AVA)
-  if (state.smartMode) {
-    handleSmartModeMessage(userMessage);
-    return;
-  }
-  
-  if (!state.apiKey) {
-    alert('Please provide an API key');
-    return;
-  }
-  
-  // Clear input
-  document.getElementById('user-message').value = '';
-  
-  // Add user message to chat
-  addChatMessage('user', userMessage);
-  
-  // Show loading
-  const loadingId = addChatMessage('assistant', 'Generating chart specification...');
+  // Disable send button to prevent multiple submissions
+  const sendButton = document.getElementById('send-message-btn');
+  const originalButtonText = sendButton.textContent;
+  sendButton.disabled = true;
+  sendButton.textContent = 'Processing...';
   
   try {
-    // Get dataset info
-    const dataset = state.datasets.find(d => d.name === state.selectedDataset);
-    const columns = dataset.columns;
-    const sampleRows = state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT);
-    
-    // Get chart spec from LLM
-    const spec = await getUpdatedChartSpec(
-      state.provider,
-      state.apiKey,
-      userMessage,
-      columns,
-      sampleRows,
-      state.currentSpec
-    );
-    
-    // Update chat with spec
-    updateChatMessage(loadingId, JSON.stringify(spec, null, 2));
-    
-    // Store spec
-    state.currentSpec = spec;
-    state.chatHistory.push({ role: 'user', content: userMessage });
-    state.chatHistory.push({ role: 'assistant', content: spec });
-    
-    // Apply spec to data
-    const transformedRows = applySpecToRows(state.currentRows, spec);
-    
-    console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
-    
-    // Render chart using renderer factory
-    const vizContainer = document.getElementById('visualization');
-    const renderer = rendererFactory.getBestRenderer(spec.chartType);
-    renderer.renderChart(vizContainer, transformedRows, spec);
-    
-    // Optional auto-refine
-    const autoRefine = document.getElementById('auto-refine')?.checked;
-    if (autoRefine && spec.chartType !== 'table' && spec.chartType !== 'tableOnly') {
-      setTimeout(() => handleAutoRefine(spec, columns, sampleRows), 1000);
+    // Handle Smart Mode (API-less with language parser + AVA)
+    if (state.smartMode) {
+      handleSmartModeMessage(userMessage);
+      return;
     }
     
-  } catch (error) {
-    console.error('Error generating chart:', error);
-    updateChatMessage(loadingId, `Error: ${error.message}`);
-    alert(`Error: ${error.message}`);
+    if (!state.apiKey) {
+      alert('Please provide an API key');
+      return;
+    }
+    
+    // Clear input
+    document.getElementById('user-message').value = '';
+    
+    // Add user message to chat
+    addChatMessage('user', userMessage);
+    
+    // Show loading
+    const loadingId = addChatMessage('assistant', 'Generating chart specification...');
+    
+    try {
+      // Get dataset info
+      const dataset = state.datasets.find(d => d.name === state.selectedDataset);
+      const columns = dataset.columns;
+      const sampleRows = state.currentRows.slice(0, DEFAULT_SAMPLE_ROW_COUNT);
+      
+      // Get chart spec from LLM
+      const spec = await getUpdatedChartSpec(
+        state.provider,
+        state.apiKey,
+        userMessage,
+        columns,
+        sampleRows,
+        state.currentSpec
+      );
+      
+      // Update chat with spec
+      updateChatMessage(loadingId, JSON.stringify(spec, null, 2));
+      
+      // Store spec
+      state.currentSpec = spec;
+      state.chatHistory.push({ role: 'user', content: userMessage });
+      state.chatHistory.push({ role: 'assistant', content: spec });
+      
+      // Apply spec to data
+      const transformedRows = applySpecToRows(state.currentRows, spec);
+      
+      console.log(`Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
+      
+      // Render chart using renderer factory
+      const vizContainer = document.getElementById('visualization');
+      const renderer = rendererFactory.getBestRenderer(spec.chartType);
+      renderer.renderChart(vizContainer, transformedRows, spec);
+      
+      // Optional auto-refine
+      const autoRefine = document.getElementById('auto-refine')?.checked;
+      if (autoRefine && spec.chartType !== 'table' && spec.chartType !== 'tableOnly') {
+        setTimeout(() => handleAutoRefine(spec, columns, sampleRows), 1000);
+      }
+      
+    } catch (error) {
+      console.error('Error generating chart:', error);
+      updateChatMessage(loadingId, `Error: ${error.message}`);
+      alert(`Error: ${error.message}`);
+    }
+  } finally {
+    // Re-enable send button
+    sendButton.disabled = false;
+    sendButton.textContent = originalButtonText;
   }
 }
 
@@ -714,51 +726,59 @@ function handleClearChat() {
  * Handle Smart Mode message processing
  */
 function handleSmartModeMessage(userMessage) {
-  // Clear input
-  document.getElementById('user-message').value = '';
-  
-  // Add user message to chat
-  addChatMessage('user', userMessage);
-  
-  const dataset = state.datasets.find(d => d.name === state.selectedDataset);
-  const columns = dataset.columns;
-  
-  // Parse command
-  let parsed = parseCommand(userMessage, columns);
-  
-  // Enhance with AVA if available
-  parsed = enhanceWithAva(parsed, state.currentRows);
-  
-  // Build response message
-  let responseText = `📊 Parsed command (confidence: ${parsed.confidence}%)\n\n`;
-  
-  if (parsed.avaReasoning) {
-    responseText += `💡 AVA Insight: ${parsed.avaReasoning}\n\n`;
+  try {
+    // Clear input
+    document.getElementById('user-message').value = '';
+    
+    // Add user message to chat
+    addChatMessage('user', userMessage);
+    
+    const dataset = state.datasets.find(d => d.name === state.selectedDataset);
+    if (!dataset) {
+      throw new Error('Dataset not found');
+    }
+    const columns = dataset.columns;
+    
+    // Parse command
+    let parsed = parseCommand(userMessage, columns);
+    
+    // Enhance with AVA if available
+    parsed = enhanceWithAva(parsed, state.currentRows);
+    
+    // Build response message
+    let responseText = `📊 Parsed command (confidence: ${parsed.confidence}%)\n\n`;
+    
+    if (parsed.avaReasoning) {
+      responseText += `💡 AVA Insight: ${parsed.avaReasoning}\n\n`;
+    }
+    
+    // Convert to ChartSpec
+    const spec = commandToSpec(parsed, columns);
+    
+    // Add AVA badge if used
+    if (parsed.avaReasoning) {
+      spec.description = (spec.description || '') + ' [AVA-Recommended]';
+    }
+    
+    // Store spec
+    state.currentSpec = spec;
+    
+    // Show spec in chat
+    addChatMessage('assistant', responseText + 'Generated ChartSpec:\n' + JSON.stringify(spec, null, 2));
+    
+    // Apply spec to data
+    const transformedRows = applySpecToRows(state.currentRows, spec);
+    
+    console.log(`Smart Mode: Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
+    
+    // Render chart
+    const vizContainer = document.getElementById('visualization');
+    const renderer = rendererFactory.getBestRenderer(spec.chartType);
+    renderer.renderChart(vizContainer, transformedRows, spec);
+  } catch (error) {
+    console.error('Error in Smart Mode:', error);
+    addChatMessage('assistant', `Error: ${error.message}\n\nPlease try rephrasing your command or check the dataset.`);
   }
-  
-  // Convert to ChartSpec
-  const spec = commandToSpec(parsed, columns);
-  
-  // Add AVA badge if used
-  if (parsed.avaReasoning) {
-    spec.description = (spec.description || '') + ' [AVA-Recommended]';
-  }
-  
-  // Store spec
-  state.currentSpec = spec;
-  
-  // Show spec in chat
-  addChatMessage('assistant', responseText + 'Generated ChartSpec:\n' + JSON.stringify(spec, null, 2));
-  
-  // Apply spec to data
-  const transformedRows = applySpecToRows(state.currentRows, spec);
-  
-  console.log(`Smart Mode: Transformed ${state.currentRows.length} rows to ${transformedRows.length} rows`);
-  
-  // Render chart
-  const vizContainer = document.getElementById('visualization');
-  const renderer = rendererFactory.getBestRenderer(spec.chartType);
-  renderer.renderChart(vizContainer, transformedRows, spec);
 }
 
 /**
