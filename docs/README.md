@@ -37,6 +37,17 @@ The classic UI remains available at [`index.html`](https://evcatalyst.github.io/
 - 🔧 **Renderer Abstraction**: Support for multiple visualization libraries (Plotly, D3)
 - 📊 **Token Estimation**: Real-time token usage tracking to optimize LLM costs
 
+## Quick Start
+
+Try ChartSpec in your browser in 2 minutes:
+
+1. **Open** → Visit [https://evcatalyst.github.io/ChartSpec/](https://evcatalyst.github.io/ChartSpec/)
+2. **Select** → Choose "Sample Sales" from the dataset dropdown
+3. **Try** → Type "show revenue by region as a bar chart" and press Send
+4. **Done** → Your chart appears instantly in Smart Mode (no API key needed)
+
+**Want more control?** Read on for the three operating modes.
+
 ## Getting Started
 
 ### 1. Open the Application
@@ -52,12 +63,12 @@ The classic UI remains available at [`index.html`](https://evcatalyst.github.io/
 
 **🚀 Option C: Deploy Your Own**
 - Fork this repository
-- Deploy to GitHub Pages (see deployment section below)
+- Deploy to GitHub Pages ([see deployment docs](docs/deployment.md))
 - Access via your GitHub Pages URL
 
 ### 2. Choose Your Mode
 
-ChartSpec offers three modes of operation:
+ChartSpec offers **three modes of operation**:
 
 #### 🤖 LLM Mode (Default)
 Full AI-powered natural language processing using OpenAI or Grok:
@@ -112,8 +123,16 @@ Manual ChartSpec JSON editing for advanced users:
 
 **Best for:**
 - Precise control over chart specifications
-- Learning the ChartSpec schema
+- Learning the [ChartSpec schema](docs/schema.md)
 - Debugging and testing
+
+📖 **Full documentation**: See [docs/schema.md](docs/schema.md) for the complete ChartSpec specification.
+
+#### 💻 Local Model workflow (Workbench)
+- Selecting **Local** in the Workbench provider menu only updates preferences; it does **not** auto-download models.
+- Use the **Load model** button in the chat drawer to start a Web Worker–backed download/warmup with progress and cancel controls.
+- Warnings surface WebGPU/storage checks and any errors in the in-app System Messages panel (plus console).
+- A lightweight stub loader runs when `window.__TEST_MODE__` is set, avoiding large downloads in CI while still exercising the UI.
 
 ### 3. Load a Dataset
 
@@ -121,18 +140,6 @@ Manual ChartSpec JSON editing for advanced users:
 The app comes with two demo datasets that are automatically registered on first load:
 - **Sample Sales**: Sales data with Date, Region, Product, Quantity, and Revenue
 - **Sample Weather**: Weather data with Date, City, Temperature, Humidity, and Precipitation
-
-**Demo Gallery (NYS Open Data):**
-- [Food Service Establishment Inspections](https://health.data.ny.gov/Health/Food-Service-Establishment-Inspections-Beginning-2/2hcc-shji)
-- [Statewide Distributed Solar Projects](https://data.ny.gov/Energy-Environment/Statewide-Distributed-Solar-Projects-Beginning-200/wgsj-jt5f)
-- [Utility Energy Registry Monthly ZIP Code Energy Use](https://data.ny.gov/Energy-Environment/Utility-Energy-Registry-Monthly-ZIP-Code-Energy-Us/tzb9-c2c6)
-- [Motor Vehicle Crashes – Case Information](https://data.ny.gov/Transportation/Motor-Vehicle-Crashes-Case-Information-Three-Year-/e8ky-4vqe)
-
-Open the **Demo Gallery** from the command bar to load live Socrata data with guardrails:
-- **Data size presets**: *Chart-Ready Aggregate* (default, <=1k rows), *Quick Sample* (<=1k rows), *Raw Rows (paged)* (limit enforced, no full dataset pulls)
-- **Freshness presets**: *Live* (fetch each time) or *Cached* (15-minute TTL with refresh)
-
-To add another NYS Open Data dataset, update `chartspec/demoDatasets.js` (and the `/docs` copy) with domain, dataset ID, tags, and SoQL query presets.
 
 **Add Your Own Dataset:**
 1. Click "Add Dataset"
@@ -143,6 +150,8 @@ To add another NYS Open Data dataset, update `chartspec/demoDatasets.js` (and th
 - First row must contain column headers
 - Values should be comma-separated
 - No special characters in headers (use alphanumeric and underscores)
+
+📖 **Full documentation**: See [docs/datasets.md](docs/datasets.md) for detailed dataset management, demo gallery, and handling large datasets.
 
 ### 4. Create Visualizations
 
@@ -176,6 +185,8 @@ You can add datasets in two ways:
    URL: https://example.com/data.csv
    ```
 
+📖 **Full documentation**: See [docs/datasets.md](docs/datasets.md) for dataset registration, limits, caching strategy, demo gallery mechanics, and handling large datasets.
+
 ### File Size Limitations
 
 ⚠️ **Important**: Browser localStorage has limitations:
@@ -184,16 +195,23 @@ You can add datasets in two ways:
 - **Recommendation**: Keep CSV files under 1MB for best performance
 - **Large files**: May cause storage quota errors or slow performance
 
-For production use with large datasets, consider:
-- Server-side data processing
-- Data sampling/filtering before import
-- Using a backend API instead of localStorage
+For production use with large datasets, see [docs/datasets.md](docs/datasets.md) for sampling and paging strategies.
 
 ### Dataset Operations
 
 - **Select**: Choose dataset from dropdown
 - **Reload**: Re-fetch and update dataset from original URL
 - **Delete**: Remove dataset and its data from localStorage
+
+📖 **See [docs/datasets.md](docs/datasets.md)** for the demo gallery (NYS Open Data) and more.
+
+## Testing & Observability
+
+- End-to-end coverage uses Playwright (`npm test`) with a built-in static server (`npm run serve`).
+- CI and local tests enable `window.__TEST_MODE__` to use the stub local-model loader and D3 fallback renderer.
+- All unhandled errors are echoed into the System Messages panel in the Workbench; clearing it does not affect console logs.
+
+📖 **Full documentation**: See [docs/testing.md](docs/testing.md) for detailed testing guide and local dev loop.
 
 ## Demo Datasets
 
@@ -213,7 +231,7 @@ These datasets are automatically registered when you first open the app.
 
 ## ChartSpec Schema
 
-The LLM generates JSON specifications with the following structure:
+The LLM generates JSON specifications with the following structure. For complete documentation with examples for all chart types, see **[docs/schema.md](docs/schema.md)**.
 
 ```json
 {
@@ -241,6 +259,8 @@ The LLM generates JSON specifications with the following structure:
   "config": { "responsive": true }
 }
 ```
+
+📖 **See [docs/schema.md](docs/schema.md)** for detailed field documentation and examples.
 
 ### Supported Chart Types
 
@@ -271,24 +291,18 @@ The LLM generates JSON specifications with the following structure:
 
 ## GitHub Pages Deployment
 
-### Option 1: Deploy from Root
+ChartSpec can be deployed to GitHub Pages from either the root directory or the `/docs` directory.
 
+**Quick Steps:**
 1. Push your code to the main branch
 2. Go to repository Settings → Pages
 3. Select "Deploy from branch"
-4. Choose "main" branch and "/ (root)"
+4. Choose "main" branch and "/ (root)" or "/docs"
 5. Save and wait for deployment
 
-### Option 2: Deploy from /docs
+📖 **Full documentation**: See [docs/deployment.md](docs/deployment.md) for detailed deployment guide, link hygiene, and troubleshooting.
 
-1. Create a `docs` folder and move all files there
-2. Push to main branch
-3. Go to Settings → Pages
-4. Choose "main" branch and "/docs"
-5. Save and wait for deployment
-
-### Verify Deployment
-
+**Verify Deployment:**
 - All assets use relative paths (`./styles.css`, `./chartspec/main.js`)
 - Demo datasets use relative paths (`./datasets/sample-sales.csv`)
 - Should work with or without custom domain
@@ -309,17 +323,36 @@ ChartSpec requires a modern browser with support for:
 
 ## Security Notes
 
-🔒 **API Key Security**:
-- API keys are stored in browser localStorage
-- Keys never leave your browser
+🔒 **API Key Security** (IMPORTANT):
+- API keys are **stored in browser localStorage only** - they never leave your browser
+- Keys are sent only to your chosen LLM provider (OpenAI/Grok) for API requests
 - **Never commit API keys to git repositories**
+- **Never share localStorage backups** that may contain keys
 - Use `.gitignore` to exclude any files containing keys
 - Clear localStorage to remove keys: `localStorage.clear()`
 
 🔒 **Data Privacy**:
 - All data processing happens in your browser
-- Data is sent to LLM provider only (OpenAI/Grok)
+- Dataset data is sent to LLM provider only when generating chart specifications
 - Review provider terms before using sensitive data
+- For maximum privacy, use **Smart Mode** (no external API calls) or **Local Mode**
+
+## Documentation
+
+📚 **Complete Documentation Hub**: [docs/index.md](docs/index.md)
+
+**Core Documentation:**
+- **[ChartSpec Schema](docs/schema.md)** - Complete field reference with examples for all chart types
+- **[Architecture Guide](docs/architecture.md)** - Pipeline, renderer abstraction, and extending ChartSpec
+- **[Dataset Management](docs/datasets.md)** - Registration, limits, caching, and demo gallery
+- **[Testing Guide](docs/testing.md)** - Running tests and local development workflow
+- **[Deployment Guide](docs/deployment.md)** - GitHub Pages setup and link hygiene
+
+**Additional Resources:**
+- [UI Architecture](docs/ui-architecture.md) - Workbench component system
+- [Storage Schema](docs/storage-schema.md) - IndexedDB and localStorage design
+- [Smart Mode Guide](docs/SMART_MODE.md) - API-less chart creation
+- [Local LLM Evaluation](docs/LOCAL_LLM_EVALUATION.md) - Browser-based AI analysis
 
 ## Local LLM Mode (Evaluation)
 
@@ -418,6 +451,8 @@ ChartSpec uses a modular architecture with clear separation of concerns:
 - Breakdown by component (system, user, spec, response)
 - Provider-specific limits (OpenAI, Grok)
 
+📖 **See [docs/architecture.md](docs/architecture.md)** for detailed pipeline diagrams and extending renderers.
+
 ### File Structure
 
 ```
@@ -462,6 +497,8 @@ Edit `llmRouter.js` to add API integration for new providers.
 
 **Customize styling:**
 Edit `styles.css` to change colors, fonts, and layout.
+
+📖 **See [docs/architecture.md](docs/architecture.md)** for detailed guidance on extending ChartSpec safely.
 
 ## License
 
